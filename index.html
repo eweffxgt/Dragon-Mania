@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#000000">
+<meta name="description" content="龙之城重置 · 三元素卡牌对战：我方三人对敌方三人轮流出招，技能属性克制决定 2 倍 / 1 倍 / 0.5 倍伤害。">
+<title>龙之城重置 · 卡牌对战</title>
+<style>
+  /* 首屏关键样式：即使外部样式表尚未就绪也有可读内容 */
+  html, body { height: 100%; margin: 0; background: #000; }
+  body { overflow: hidden; color: #fff2d6; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif; }
+  .boot {
+    position: absolute; top: 0; right: 0; bottom: 0; left: 0;
+    z-index: 20;
+    display: grid; place-items: center;
+    background: #46021c;
+    text-align: center;
+  }
+  .boot-title { font-size: 16px; letter-spacing: 4px; color: #ffbf29; }
+  .boot-sub { margin-top: 6px; font-size: 10px; color: #ffd9a8; letter-spacing: 1px; }
+</style>
+<link rel="stylesheet" href="./styles/pixel.css">
+</head>
+<body>
+<!-- 2:1 固定比例的游戏画面：等比缩放到窗口里，剩下的地方全部填黑 -->
+<div class="fit" id="fit">
+  <div class="stage" id="stage">
+    <!-- 边框终稿：铺满整个画面，所有内容都对齐到它的镂空区域 -->
+    <div class="frame-art" aria-hidden="true"></div>
+
+    <!-- JS 就绪前的首屏（build 时会被移除） -->
+    <div class="boot" id="boot" role="status" aria-live="polite">
+      <div class="boot-title">龙之城重置</div>
+      <div class="boot-sub">回合制卡牌对战 · 准备中…</div>
+    </div>
+
+    <section class="side side-ally" id="allySide"></section>
+
+    <section class="center">
+      <div class="log-wrap">
+        <div class="log-head">
+          <span class="hud-round">回合 <b id="roundNum">1</b></span>
+          <div class="hud-order" id="orderBar"></div>
+          <span class="cards-hint" id="cardsHint">准备中…</span>
+          <div class="hud-btns">
+            <button id="btnAuto" class="px-btn">自动 关</button>
+            <button id="btnSound" class="px-btn">音效 开</button>
+            <button id="btnRestart" class="px-btn">重开</button>
+          </div>
+        </div>
+        <div class="log" id="log"></div>
+      </div>
+
+      <div class="cards-wrap">
+        <div class="cards" id="cards"></div>
+      </div>
+    </section>
+
+    <section class="side side-enemy" id="enemySide"></section>
+
+    <!-- 飘字与结算层放在 stage 内，竖屏旋转时跟着一起转 -->
+    <div id="fxLayer"></div>
+    <div id="overlay" class="overlay hidden"></div>
+  </div>
+</div>
+
+<div class="scanlines"></div>
+<div id="rotateHint" class="rotate-hint">↻ 把手机横过来玩</div>
+
+<noscript>
+  <div class="boot">
+    <div class="boot-title">龙之城重置</div>
+    <div class="boot-sub">需要开启 JavaScript 才能进行对战</div>
+  </div>
+</noscript>
+
+<script defer src="./src/data/elements.js"></script>
+<script defer src="./src/data/statuses.js"></script>
+<script defer src="./src/data/skills.js"></script>
+<script defer src="./src/data/characters.js"></script>
+<script defer src="./src/ui/pixelart.js"></script>
+<script defer src="./src/ui/audio.js"></script>
+<script defer src="./src/ui/render.js"></script>
+<script defer src="./src/engine/battle.js"></script>
+<script defer src="./src/main.js"></script>
+</body>
+</html>

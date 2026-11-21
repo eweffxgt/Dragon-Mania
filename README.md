@@ -25,6 +25,39 @@ python -m http.server 8080
 # 浏览器打开 http://127.0.0.1:8080
 ```
 
+## 上传到 GitHub / 在线试玩
+
+仓库已初始化并有首次提交（分支 `main`），`dist/`、`.skill/`、`*.zip` 已在 `.gitignore` 里排除。
+
+### 推送到 GitHub
+
+1. 在 github.com 点 **New repository**，仓库名随意（例如 `dragon-card-battle`），
+   **不要**勾选 README / .gitignore / license（保持空仓库）
+2. 在本目录打开终端：
+
+```powershell
+git remote add origin https://github.com/<你的账号>/<仓库名>.git
+git push -u origin main
+```
+
+第一次 push 会弹出登录窗口（GitHub 已经不支持账号密码，用浏览器授权或 Personal Access Token 即可）。
+
+### 开启 GitHub Pages（在线玩）
+
+仓库 **Settings → Pages**：
+
+- Source 选 **Deploy from a branch**
+- Branch 选 **main**，目录选 **/(root)**
+- Save，等一两分钟
+
+地址就是 `https://<你的账号>.github.io/<仓库名>/`。
+
+页面是纯静态的，所有资源都是相对路径，**不需要任何构建**，Pages 直接就能跑。
+手机打开后横屏（或直接竖屏，会自动旋转铺满）即可游玩。
+
+> 想发小工具 zip 的话，在仓库 **Releases** 里新建一个 release，把 `龙之城重置-minitool.zip` 拖进去当附件，
+> 比直接提交进仓库更合适（zip 属于构建产物，已在 `.gitignore` 里排除）。
+
 ## 屏幕比例与横竖屏（重要）
 
 游戏画面是**固定 2:1 比例**（与参考图一致），整块画面等比缩放到窗口里，

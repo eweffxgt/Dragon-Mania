@@ -11,7 +11,7 @@ const Guide = (function () {
   var ROWS = [84.0, 222.6];
   var SLOT_W = 71.6;
   var SLOT_H = 79.7;
-  var BAR_DY = 12.2;   /* 元素条相对窗口底部的偏移 */
+  var BAR_DY = 14.7;   /* 元素条相对窗口底部的偏移（含图标下移，视觉居中） */
   var BAR_H = 29.6;
 
   var page = 0;

@@ -10,3 +10,8 @@ node_modules/
 .DS_Store
 Thumbs.db
 desktop.ini
+
+# ---------- 本机临时文件（CA 包 / 脚本） ----------
+tools/*.pem
+tools/*.cer
+tools/*.cmd

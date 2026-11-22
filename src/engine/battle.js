@@ -237,6 +237,7 @@ const Battle = (function () {
 
     checkEnd(st);
     await sleep(opts.dot ? 320 : 260);
+    return dmg;
   }
 
   /* 复仇印记：携带者阵亡时，对全体敌人造成伤害 */
@@ -320,7 +321,13 @@ const Battle = (function () {
         const t = list[i];
         if (!t.alive || st.over) continue;
         const res = calcDamage(actor, t, skill.element, op.k);
+        const hpBefore = t.hp;
         await damage(st, t, res.dmg, { crit: res.crit, mult: res.mult, source: actor });
+        /* 吸血：按实际打掉的生命回复施法者 */
+        if (op.drain) {
+          const dealt = Math.max(0, hpBefore - t.hp);
+          if (dealt > 0) await heal(st, actor, dealt, '汲取');
+        }
         ctx.hit = ctx.hit || [];
         if (ctx.hit.indexOf(t.uid) < 0) ctx.hit.push(t.uid);
         if (t === ctx.target && !t.alive) ctx.targetDied = true;
@@ -335,7 +342,9 @@ const Battle = (function () {
         if (st.over) return;
         let amount = opValue(actor, op);
         /* 吸血类：治疗量不超过目标当前生命 */
-        if (op.capByTarget && ctx.target) amount = Math.min(amount, Math.max(0, ctx.target.hp));
+        if (op.capByTarget && ctx.target) {
+          amount = Math.min(amount, Math.max(0, ctx.hpBefore != null ? ctx.hpBefore : ctx.target.hp));
+        }
         await heal(st, list[i], amount, op.capByTarget ? '汲取' : skill.name);
       }
       return;
@@ -426,15 +435,17 @@ const Battle = (function () {
     }
   }
 
-  /* ================= 出招 ================= */
+  /* ================= 出招 =================
+   * 统一规则：任何技能打在「对手」身上，都先结算一次 100% 攻击力的伤害，
+   * 再结算技能自己的附加效果。辅助技能打敌方就只有这一下（等于普通攻击）。 */
   async function perform(st, actor, skill, target) {
-    /* 辅助技能指向敌方 = 只当作一次普通攻击（100% 攻击力，没有附加效果） */
-    const asAttack = skill.side === 'ally' && target.side !== actor.side;
+    const toFoe = target.side !== actor.side;
 
     const cls = actor.side === 'ally' ? 'log-ally' : 'log-enemy';
     UI.log(
       '　' + sideTag(actor) + nameHtml(actor) + ' → ' + nameHtml(target) +
-      ' 使用 <b class="skname">' + skill.name + '</b>' + (asAttack ? '（普通攻击）' : ''),
+      ' 使用 <b class="skname">' + skill.name + '</b>' +
+      (toFoe && skill.side === 'ally' ? '（普通攻击）' : ''),
       cls
     );
 
@@ -442,18 +453,10 @@ const Battle = (function () {
     await sleep(140);
 
     /* 对手龙的攻击有 20% 概率落空 */
-    if (actor.side === 'enemy' && target.side !== actor.side && Math.random() < ENEMY_RULES.missChance) {
+    if (actor.side === 'enemy' && toFoe && Math.random() < ENEMY_RULES.missChance) {
       UI.floatText(target.uid, 'MISS', 'status');
       UI.log('　' + nameHtml(actor) + ' 的攻击落空了，没有命中 ' + nameHtml(target) + '！', 'log-status');
       await sleep(420);
-      return;
-    }
-
-    /* 普通攻击形态：不结算任何辅助/削弱效果 */
-    if (asAttack) {
-      const res = calcDamage(actor, target, skill.element, 1.0);
-      await damage(st, target, res.dmg, { crit: res.crit, mult: res.mult, source: actor });
-      await sleep(160);
       return;
     }
 
@@ -461,9 +464,32 @@ const Battle = (function () {
       skill,
       target,
       before: target.statuses.map((s) => s.id),
+      hpBefore: target.hp,
       targetDied: false,
     };
 
+    /* ---- 第一步：对敌方先打一次 100% 攻击 ----
+     * 少数技能（如闪电「燃烧殆尽」）在伤害前还有前置效果，写在 preOps 里。 */
+    if (toFoe) {
+      const pre = skill.preOps || [];
+      for (let i = 0; i < pre.length; i++) {
+        await runOp(st, actor, ctx, pre[i]);
+        if (st.over || st.token !== token) return;
+      }
+      if (target.alive) {
+        const res = calcDamage(actor, target, skill.element, 1.0);
+        await damage(st, target, res.dmg, { crit: res.crit, mult: res.mult, source: actor });
+        if (!target.alive) ctx.targetDied = true;
+        if (st.over || st.token !== token) return;
+      }
+      /* 辅助技能指向敌方：到此为止，没有任何附加效果 */
+      if (skill.side === 'ally') {
+        await sleep(160);
+        return;
+      }
+    }
+
+    /* ---- 第二步：技能自己的附加效果 ---- */
     for (let i = 0; i < skill.ops.length; i++) {
       await runOp(st, actor, ctx, skill.ops[i]);
       if (st.over || st.token !== token) return;
@@ -619,7 +645,8 @@ const Battle = (function () {
       if (sk.side === 'enemy') {
         foes.forEach((foe) => {
           const mult = elementMatchup(sk.element, foe.element);
-          let score = 0;
+          /* 统一规则：打敌方先算一次 100% 攻击，再叠加技能效果 */
+          let score = 1.0 * mult;
           ops.forEach((o) => { score += opWeight(actor, sk, o, allies.length) * mult; });
           score *= 1 + 0.6 * (1 - foe.hp / foe.maxHp);   // 集中火力：越残血越优先
           cand.push({ skill: sk, target: foe, score });

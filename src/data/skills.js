@@ -28,9 +28,8 @@ const SKILL_DEFS = {
   /* 火：灼烧之炭 —— 150% 分摊伤害 + 击杀连锁 */
   fire: {
     name: '灼烧之炭', side: 'enemy',
-    desc: '主目标受到 100% 攻击伤害，其余敌人各受 85%；若主目标被击败，其余敌人再受一次 85%。',
+    desc: '先对主目标造成 100% 攻击伤害；其余敌人各受 85%，若主目标被击败，其余敌人再受一次 85%。',
     ops: [
-      { op: 'damage', k: 1.0 },
       { op: 'damage', k: 0.85, to: 'otherEnemies' },
       { op: 'onKill', ops: [{ op: 'damage', k: 0.85, to: 'otherEnemies' }] },
     ],
@@ -39,7 +38,7 @@ const SKILL_DEFS = {
   /* 微风：暴风灾难 —— 单体强虚弱 + 群体虚弱 */
   breeze: {
     name: '暴风灾难', side: 'enemy',
-    desc: '目标造成伤害 -90%（2 回合）；其余敌人造成伤害 -40%（2 回合）。',
+    desc: '先造成 100% 攻击伤害；目标造成伤害 -90%（2 回合），其余敌人 -40%（2 回合）。',
     ops: [
       { op: 'status', id: 'weaken', value: 90, turns: 2, to: 'target' },
       { op: 'status', id: 'weaken', value: 40, turns: 2, to: 'otherEnemies' },
@@ -70,7 +69,7 @@ const SKILL_DEFS = {
   /* 草：疯狂感染 —— 纯持续伤害 + 击杀扩散 */
   grass: {
     name: '疯狂感染', side: 'enemy',
-    desc: '使目标中毒，2 回合内共造成 80% 攻击的伤害；带感染的敌人被击败时，其余敌人同样中毒 80% × 2 回合。',
+    desc: '先造成 100% 攻击伤害；并使目标中毒，2 回合内共造成 80% 攻击的伤害。带感染的敌人被击败时，其余敌人同样中毒 80% × 2 回合。',
     ops: [
       { op: 'status', id: 'poison', k: 0.4, turns: 2, to: 'target' },
       { op: 'onKill', ifStatus: 'poison', ops: [
@@ -92,19 +91,20 @@ const SKILL_DEFS = {
   /* 电：燃烧殆尽 —— 三连跳伤害 + 先手驱散 */
   electric: {
     name: '燃烧殆尽', side: 'enemy',
-    desc: '先清除主目标所有正面状态；主目标受 100% 攻击伤害，另一名敌人受 90%，50% 概率再让第三名敌人受 80%。',
-    ops: [
+    desc: '先清除主目标所有正面状态，再造成 100% 攻击伤害；另一名敌人受 90%，50% 概率再让第三名敌人受 80%。',
+    preOps: [
       { op: 'dispel', kind: 'buff', to: 'target' },
-      { op: 'damage', k: 1.0 },
+    ],
+    ops: [
       { op: 'damage', k: 0.9, to: 'randomOther' },
       { op: 'chance', p: 0.5, ops: [{ op: 'damage', k: 0.8, to: 'randomOther' }] },
     ],
   },
 
-  /* 虚空：黑暗仪式 —— 吸血治疗 + 转移正面状态 */
+  /* 虚空：黑暗仪式 —— 吸血 + 转移正面状态 */
   void: {
     name: '黑暗仪式', side: 'enemy',
-    desc: '为施法者回复 85% 攻击的生命（不超过目标当前生命）；若目标有正面状态，把它们转给自己（最多 2 回合）。',
+    desc: '先造成 100% 攻击伤害，再把目标当前生命的一部分（85% 攻击）吸给自己；若目标有正面状态，把它们转给自己（最多 2 回合）。',
     ops: [
       { op: 'heal', k: 0.85, to: 'caster', capByTarget: true },
       { op: 'steal', maxTurns: 2 },
@@ -114,7 +114,7 @@ const SKILL_DEFS = {
   /* 暗：惊恐失语 —— 封印 */
   dark: {
     name: '惊恐失语', side: 'enemy',
-    desc: '50% 概率使目标 2 回合内无法使用任何主动技能（封印）。',
+    desc: '先造成 100% 攻击伤害；50% 概率使目标 2 回合内无法使用任何主动技能（封印）。',
     ops: [
       { op: 'chance', p: 0.5, ops: [{ op: 'status', id: 'seal', turns: 2, to: 'target' }] },
     ],
@@ -123,18 +123,17 @@ const SKILL_DEFS = {
   /* 光：治愈之光 —— 分摊伤害 + 群体治疗 */
   light: {
     name: '治愈之光', side: 'enemy',
-    desc: '主目标受到 100% 攻击伤害，其余敌人各受 85%；命中时 80% 概率为全体友军回复 10% 攻击的生命。',
+    desc: '先对主目标造成 100% 攻击伤害；其余敌人各受 85%，命中时 80% 概率为全体友军回复 10% 攻击的生命。',
     ops: [
-      { op: 'damage', k: 1.0 },
       { op: 'damage', k: 0.85, to: 'otherEnemies' },
       { op: 'chance', p: 0.8, ops: [{ op: 'heal', k: 0.1, to: 'allies' }] },
     ],
   },
 
-  /* 古代：大量汲取 —— 削攻 + 群体增伤 */
+  /* 古代：大量汲取 —— 汲取伤害 + 削攻 + 群体增伤 */
   ancient: {
     name: '大量汲取', side: 'enemy',
-    desc: '目标造成伤害 -60%（2 回合），同时全体友军造成伤害 +25%（2 回合）。',
+    desc: '先造成 100% 攻击伤害，并使目标造成伤害 -60%（2 回合）；同时全体友军造成伤害 +25%（2 回合）。',
     ops: [
       { op: 'status', id: 'weaken', value: 60, turns: 2, to: 'target' },
       { op: 'status', id: 'atk_up', value: 25, turns: 2, to: 'allies' },
@@ -171,8 +170,9 @@ const SKILL_BY_ELEMENT = {};
 (function buildSkills() {
   Object.keys(SKILL_DEFS).forEach(function (el) {
     var def = SKILL_DEFS[el];
-    var hasDamage = false;
-    var dmgK = 0;
+    /* 对敌技能一律自带一次 100% 攻击，所以 dmgK 从 1.0 起算 */
+    var hasDamage = def.side === 'enemy';
+    var dmgK = def.side === 'enemy' ? 1.0 : 0;
     (function walk(ops) {
       (ops || []).forEach(function (o) {
         if (o.op === 'damage') {

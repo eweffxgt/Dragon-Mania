@@ -223,6 +223,11 @@
      *   ?screen=guide  直接看图鉴页
      * 默认先进主界面。 */
     const params = new URLSearchParams(location.search);
+
+    /* ?seed=123 固定随机种子：同一场战斗可以复现，抽帧做视频用 */
+    const seed = params.get('seed');
+    if (seed) Battle.setSeed(seed);
+
     const screen = params.get('screen');
     if (screen === 'manage' || screen === 'guide') {
       bindMenu();

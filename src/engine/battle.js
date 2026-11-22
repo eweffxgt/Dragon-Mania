@@ -12,6 +12,23 @@ const Battle = (function () {
 
   const ORDER = ['p0', 'e0', 'p1', 'e1', 'p2', 'e2'];
 
+  /* ---------- 可播种随机数（?seed= 用，保证同种子同一场战斗） ---------- */
+  let rngState = 0;
+  let rngOn = false;
+  function rnd() {
+    if (!rngOn) return Math.random();
+    rngState = (rngState + 0x6D2B79F5) | 0;
+    var t = Math.imul(rngState ^ (rngState >>> 15), 1 | rngState);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  }
+  function setSeed(seed) {
+    var n = Number(seed);
+    if (!isFinite(n) || n === 0) { rngOn = false; return; }
+    rngState = n >>> 0 || 1;
+    rngOn = true;
+  }
+
   /* 平衡开关：默认 1 = 完全按「数值对照表.txt」结算。
    * 敌方阵容的输出牌比我们多，AI 对 AI 我方胜率偏低；
    * 想让对局更好打，把 enemyOutgoing 调小（例如 0.8），不影响任何数值表。 */
@@ -38,8 +55,8 @@ const Battle = (function () {
 
   let TS = 1;                                   // 时间缩放（模拟器里设为 0）
   const sleep = (ms) => new Promise((r) => setTimeout(r, ms * TS));
-  const rand = (a, b) => a + Math.random() * (b - a);
-  const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
+  const rand = (a, b) => a + rnd() * (b - a);
+  const pick = (arr) => arr[Math.floor(rnd() * arr.length)];
 
   let S = null;
   let token = 0;
@@ -154,7 +171,7 @@ const Battle = (function () {
     const mult = elementMatchup(element, target.element);
     dmg *= mult;
 
-    const crit = Math.random() * 100 < (user.crit + um.critAdd);
+    const crit = rnd() * 100 < (user.crit + um.critAdd);
     if (crit) dmg *= 1.6;
     dmg *= rand(0.94, 1.06);
 
@@ -319,7 +336,7 @@ const Battle = (function () {
       case 'randomOther': {
         const pool = aliveOf(st, foeSide).filter((c) => c !== t && (ctx.hit || []).indexOf(c.uid) < 0);
         if (!pool.length) return [];
-        const one = pool[Math.floor(Math.random() * pool.length)];
+        const one = pool[Math.floor(rnd() * pool.length)];
         return [one];
       }
       default: return t && t.alive ? [t] : [];
@@ -439,7 +456,7 @@ const Battle = (function () {
 
     /* ---- 概率触发 ---- */
     if (op.op === 'chance') {
-      if (Math.random() < (op.p == null ? 0.5 : op.p)) {
+      if (rnd() < (op.p == null ? 0.5 : op.p)) {
         for (let i = 0; i < op.ops.length; i++) await runOp(st, actor, ctx, op.ops[i]);
       } else if (op.failText) {
         UI.log('　' + op.failText, 'log-status');
@@ -474,7 +491,7 @@ const Battle = (function () {
     await sleep(140);
 
     /* 对手龙的攻击有 20% 概率落空 */
-    if (actor.side === 'enemy' && toFoe && Math.random() < ENEMY_RULES.missChance) {
+    if (actor.side === 'enemy' && toFoe && rnd() < ENEMY_RULES.missChance) {
       UI.floatText(target.uid, 'MISS', 'status');
       UI.log('　' + nameHtml(actor) + ' 的攻击落空了，没有命中 ' + nameHtml(target) + '！', 'log-status');
       await sleep(420);
@@ -560,7 +577,7 @@ const Battle = (function () {
     }
 
     /* 麻痹 */
-    if (statusOf(actor, 'paralyze') && Math.random() < 0.35) {
+    if (statusOf(actor, 'paralyze') && rnd() < 0.35) {
       UI.floatText(actor.uid, '麻痹!', 'status');
       UI.log('　' + nameHtml(actor) + ' 被【麻痹】，无法行动！', 'log-status');
       await sleep(620);
@@ -657,7 +674,7 @@ const Battle = (function () {
     const weakest = allies.reduce((a, b) => (a.hp / a.maxHp < b.hp / b.maxHp ? a : b));
     const ratio = weakest.hp / weakest.maxHp;
     const buffed = allies.every((a) => a.statuses.some((s) => s.id === 'atk_up'));
-    const skipDefensive = actor.side === 'enemy' && Math.random() < ENEMY_RULES.skipDefensiveChance;
+    const skipDefensive = actor.side === 'enemy' && rnd() < ENEMY_RULES.skipDefensiveChance;
 
     const cand = [];
 
@@ -704,8 +721,8 @@ const Battle = (function () {
 
     if (!cand.length) return { skill: actor.skills[0], target: actor };
     cand.sort((a, b) => b.score - a.score);
-    if (Math.random() < 0.82 || cand.length === 1) return cand[0];
-    return cand[Math.min(cand.length - 1, 1 + Math.floor(Math.random() * 2))];
+    if (rnd() < 0.82 || cand.length === 1) return cand[0];
+    return cand[Math.min(cand.length - 1, 1 + Math.floor(rnd() * 2))];
   }
 
   /* ================= 主循环 ================= */
@@ -879,6 +896,7 @@ const Battle = (function () {
     setAuto,
     isAuto: () => autoPlay,
     setTimeScale: (v) => { TS = v; },
+    setSeed: setSeed,
     getState: () => S,
   };
 })();

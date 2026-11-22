@@ -4,7 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#000000">
-<meta name="description" content="龙之城重置 · 三元素卡牌对战：我方三人对敌方三人轮流出招，技能属性克制决定 2 倍 / 1 倍 / 0.5 倍伤害。">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="description" content="龙之城重置 · 三元素卡牌对战：我方三人对敌方三人轮流出招，技能属性克制决定 1.5 倍 / 1 倍 / 0.5 倍伤害。">
 <title>龙之城重置 · 卡牌对战</title>
 <style>
   /* 首屏关键样式：即使外部样式表尚未就绪也有可读内容 */
@@ -84,5 +87,7 @@
 <script defer src="./src/ui/render.js"></script>
 <script defer src="./src/engine/battle.js"></script>
 <script defer src="./src/main.js"></script>
+<!-- 网页版强制全屏增强：小工具版本（dist/index.html）不加载这一行 -->
+<script defer src="./src/ui/fullscreen.js"></script>
 </body>
 </html>

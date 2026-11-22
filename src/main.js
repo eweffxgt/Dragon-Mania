@@ -143,10 +143,8 @@
     const hint = el('subHint');
     if (menu) menu.classList.add('hidden');
     if (sub) sub.classList.remove('hidden');
-    if (title) title.textContent = which === 'manage' ? '管 理' : '图 鉴';
-    if (hint) hint.textContent = which === 'manage'
-      ? '队伍、技能培养还没做，先留空'
-      : '元素图鉴还没做，先留空';
+    if (title) title.textContent = '管 理';
+    if (hint) hint.textContent = '队伍、技能培养还没做，先留空';
   }
 
   function removeBoot() {
@@ -158,6 +156,8 @@
     hideMenu();
     const sub = el('subScreen');
     if (sub) sub.classList.add('hidden');
+    const gs = el('guideScreen');
+    if (gs) gs.classList.add('hidden');
     removeBoot();
     UI.clearOverlay();
     Battle.init();
@@ -185,7 +185,7 @@
     if (guide) {
       guide.addEventListener('click', function () {
         Sfx.click();
-        showSub('guide');
+        Guide.open();
       });
     }
     if (back) {
@@ -216,6 +216,8 @@
     }, 150);
 
     bindMenu();
+    Guide.bind();
+    Guide.onClose = showMenu;
 
     /* URL 参数（调试 / 截图用）：
      *   ?auto=1        直接进战斗
@@ -229,9 +231,10 @@
     if (seed) Battle.setSeed(seed);
 
     const screen = params.get('screen');
-    if (screen === 'manage' || screen === 'guide') {
-      bindMenu();
-      showSub(screen);
+    if (screen === 'guide') {
+      Guide.open();
+    } else if (screen === 'manage') {
+      showSub('manage');
     } else if (params.get('auto') === '1') {
       boot();
       startBattle();

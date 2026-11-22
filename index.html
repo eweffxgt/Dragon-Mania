@@ -83,6 +83,15 @@
         <button type="button" class="px-btn big" id="subBack">返 回</button>
       </div>
     </section>
+    <!-- ================= 图鉴 ================= -->
+    <!-- 整张「图鉴界面」当底图，16 个窗口 + 左右翻页箭头压在上面 -->
+    <section class="screen guide-screen hidden" id="guideScreen">
+      <img class="guide-bg" src="./assets/guide.png" alt="图鉴">
+      <div class="guide-grid" id="guideGrid"></div>
+      <button type="button" class="guide-arrow" id="guidePrev" aria-label="上一页"></button>
+      <button type="button" class="guide-arrow" id="guideNext" aria-label="下一页"></button>
+      <button type="button" class="px-btn guide-back" id="guideBack">返回</button>
+    </section>
   </div>
 </div>
 
@@ -100,9 +109,11 @@
 <script defer src="./src/data/statuses.js"></script>
 <script defer src="./src/data/skills.js"></script>
 <script defer src="./src/data/characters.js"></script>
+<script defer src="./src/data/guide.js"></script>
 <script defer src="./src/ui/pixelart.js"></script>
 <script defer src="./src/ui/audio.js"></script>
 <script defer src="./src/ui/render.js"></script>
+<script defer src="./src/ui/guide.js"></script>
 <script defer src="./src/engine/battle.js"></script>
 <script defer src="./src/main.js"></script>
 <!-- 网页版强制全屏增强：小工具版本（dist/index.html）不加载这一行 -->

@@ -814,3 +814,92 @@ button { font-family: inherit; }
   color: #ffd9a8;
 }
 .sub-box .px-btn.big { margin-top: 26px; }
+
+/* =========================================================
+ * 图鉴界面
+ * 底图是整张「图鉴界面」，16 个窗口位置按原图测量后写死
+ * ========================================================= */
+.guide-screen { background: #f0a020; }
+.guide-bg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.guide-grid {
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+}
+
+/* 单个窗口：头像铺满，名字压在底部（和战斗界面同一套观感） */
+.g-slot {
+  position: absolute;
+  background: var(--dark);
+  overflow: hidden;
+}
+.g-ava {
+  display: block;
+  width: 100%;
+  height: 100%;
+  image-rendering: pixelated;
+}
+.g-name {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 0 1px;
+  font-size: 8px;
+  line-height: 1.3;
+  color: var(--yellow);
+  background: rgba(51, 19, 24, 0.85);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: center;
+}
+
+/* 元素条：窗口下方那条金色长条，图标横向均匀排 */
+.g-bar {
+  position: absolute;
+  display: flex;
+  -webkit-box-pack: space-around;
+  justify-content: space-around;
+  -webkit-box-align: center;
+  align-items: center;
+}
+.g-icon {
+  display: block;
+  width: 16px;
+  height: 16px;
+  image-rendering: pixelated;
+}
+
+/* 左右翻页箭头：透明热区压在底图的小方块上 */
+.guide-arrow {
+  position: absolute;
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  outline: 0;
+  cursor: pointer;
+  -webkit-appearance: none;
+  -webkit-tap-highlight-color: transparent;
+}
+#guidePrev { left: 7px; top: 180px; width: 32px; height: 60px; }
+#guideNext { left: 801px; top: 180px; width: 32px; height: 60px; }
+.guide-arrow:hover:not([disabled]) { background: rgba(255, 241, 160, 0.22); }
+.guide-arrow:active:not([disabled]) { background: rgba(255, 241, 160, 0.38); }
+.guide-arrow[disabled] {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.guide-back {
+  position: absolute;
+  left: 8px;
+  bottom: 6px;
+}

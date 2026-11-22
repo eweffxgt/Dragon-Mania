@@ -162,11 +162,10 @@ const UI = (function () {
       .map((s) => {
         const d = STATUSES[s.id];
         if (!d) return '';
-        const isPoint = s.id === 'shield' || s.id === 'poison' || s.id === 'regen' || s.id === 'burn';
         const value = s.id === 'shield' ? fmtNum(s.value) : '';
         const turns = s.id === 'shield' ? '' : '<i>' + s.turns + '</i>';
         return '<span class="chip ' + d.kind + '" style="--c:' + d.color + '" title="' +
-          d.name + '：' + d.val(s.value) + '（剩余 ' + s.turns + ' 回合）">' +
+          d.name + '：' + d.val(s.value, s) + '（剩余 ' + s.turns + ' 回合）">' +
           d.short + value + turns + '</span>';
       })
       .join('');

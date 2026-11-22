@@ -45,13 +45,15 @@ const SKILL_DEFS = {
     ],
   },
 
-  /* 大地：不破之石 —— 高额护盾（直接 120%/70% + 间接 40%/20% 合并计算） */
+  /* 大地：不破之石 —— 减伤（不消耗），持续 6 回合（4 + 精通 2）
+   * 目标：直接伤害每次最多吸收 120% 攻击，间接（中毒/灼烧）40%
+   * 其余：直接 70%，间接 20% */
   earth: {
     name: '不破之石', side: 'ally',
-    desc: '为目标附加 160% 攻击的护盾，其余友军各 90%，持续 4 回合。',
+    desc: '为目标附加「石之守护」6 回合：每次直接伤害最多吸收 120% 攻击（超出部分才进血），间接伤害最多吸收 40%；其余友军为 70% / 20%。护盾不会被消耗。',
     ops: [
-      { op: 'status', id: 'shield', k: 1.6, turns: 4, to: 'target' },
-      { op: 'status', id: 'shield', k: 0.9, turns: 4, to: 'otherAllies' },
+      { op: 'status', id: 'guard', k: 1.2, ik: 0.4, turns: 6, to: 'target' },
+      { op: 'status', id: 'guard', k: 0.7, ik: 0.2, turns: 6, to: 'otherAllies' },
     ],
   },
 

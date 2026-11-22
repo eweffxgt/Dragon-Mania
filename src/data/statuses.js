@@ -24,7 +24,13 @@ const STATUSES = {
   },
   shield: {
     name: '护盾', short: '盾', kind: 'buff', color: '#9fd8ff',
-    val: (v) => `优先吸收 ${fmtNum(v)} 点伤害`,
+    val: (v) => `优先吸收 ${fmtNum(v)} 点伤害（可消耗）`,
+  },
+  guard: {
+    name: '石之守护', short: '减伤', kind: 'buff', color: '#c9a06a',
+    val: (v, s) => `每次直接伤害最多吸收 ${fmtNum(v)}`
+      + (s && s.indirect ? `；间接伤害最多吸收 ${fmtNum(s.indirect)}` : '')
+      + '（不消耗，持续到回合结束）',
   },
   maxhp_up: {
     name: '生命充盈', short: '生命↑', kind: 'buff', color: '#ff9ad5',

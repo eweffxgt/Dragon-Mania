@@ -116,15 +116,33 @@ def footer(im, slogan, y=1118):
 def cover(path):
     im = bg()
     d = ImageDraw.Draw(im)
-    kicker(d, "像素风 · 回合制 · 免费玩")
-    center_text(d, 140, "龙之城重置", f(150), GOLD, stroke=8)
-    center_text(d, 320, "三条龙打三条龙", f(52, False), CREAM, stroke=5)
+    kicker(d, "像素风 · 回合制 · 小红书小工具")
 
-    bottom = paste_shot(im, os.path.join(RAW, "c-guard.png"), 425, 940)
-    chips(im, bottom + 46, ["13 元素克制", "6 条龙 3v3", "浏览器直接开"])
+    title_font = f(186)
+    title = "龙之城"
+    vfont = f(40)
+    vtext = "v1.02"
+    tw = d.textlength(title, font=title_font)
+    vw = d.textlength(vtext, font=vfont)
+    gap = 30
+    total = tw + gap + vw + 32
+    tx = (W - total) / 2
+    ty = 132
+    d.text((tx, ty), title, font=title_font, fill=GOLD, stroke_width=9, stroke_fill=INK)
+
+    # 版本角标（和标题作为一组居中）
+    vx = tx + tw + gap
+    vy = ty + 104
+    d.rectangle([vx, vy - 6, vx + vw + 30, vy + 52], fill=CRIMSON, outline=GOLD, width=3)
+    d.text((vx + 15, vy), vtext, font=vfont, fill=YELLOW)
+
+    center_text(d, 352, "三条龙打三条龙", f(52, False), CREAM, stroke=5)
+
+    bottom = paste_shot(im, os.path.join(RAW, "c-guard.png"), 445, 940)
+    chips(im, bottom + 46, ["13 元素克制", "6 条龙 3v3", "小工具直接开"])
 
     d = ImageDraw.Draw(im)
-    center_text(d, bottom + 134, "点开就能玩 · 不用下载", f(40, False), YELLOW, stroke=5)
+    center_text(d, bottom + 134, "小红书里点开就玩 · 不用下载", f(38, False), YELLOW, stroke=5)
     footer(im, "6 条龙 · 3 打 3 · 13 种元素互相克制", 1150)
     im.save(path, quality=95)
     print("cover ok")

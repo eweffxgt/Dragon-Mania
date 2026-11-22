@@ -749,3 +749,68 @@ button { font-family: inherit; }
 .hud-order > * + * { margin-left: 2px; }
 .hud-btns > * + * { margin-left: 2px; }
 .cards > * + * { margin-left: 8.4px; }
+
+/* =========================================================
+ * 主界面 / 子界面（管理层，覆盖在战斗界面之上）
+ * 整张「游戏主界面」当底图，三个透明按钮压在图上对应位置
+ * 位置由原图 4000x2000 量出来后换算成 840x420 的百分比
+ * ========================================================= */
+.screen {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 900;
+}
+.screen.hidden { display: none; }
+
+.menu-screen { background: #46021c; }
+.menu-bg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* 透明热区：只有轻微高亮，不改变画面 */
+.menu-hit {
+  position: absolute;
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  outline: 0;
+  cursor: pointer;
+  -webkit-appearance: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color 0.12s;
+}
+.menu-hit:hover { background: rgba(255, 241, 160, 0.16); }
+.menu-hit:active { background: rgba(255, 241, 160, 0.32); }
+.menu-hit.on { background: rgba(255, 241, 160, 0.28); }
+
+#menuFight  { left: 34%; top: 37.6%; width: 32%; height: 8.5%; }
+#menuManage { left: 34%; top: 55.2%; width: 32%; height: 8.5%; }
+#menuGuide  { left: 34%; top: 72.2%; width: 32%; height: 8.5%; }
+
+/* 管理 / 图鉴：先留空 */
+.sub-screen {
+  background: #46021c;
+  display: grid;
+  place-items: center;
+}
+.sub-box { text-align: center; color: var(--cream); }
+.sub-title {
+  font-size: 34px;
+  font-weight: 700;
+  letter-spacing: 8px;
+  color: var(--gold);
+  text-shadow: 3px 3px 0 var(--maroon);
+}
+.sub-hint {
+  margin-top: 12px;
+  font-size: 13px;
+  letter-spacing: 1px;
+  color: #ffd9a8;
+}
+.sub-box .px-btn.big { margin-top: 26px; }

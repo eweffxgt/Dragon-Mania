@@ -112,8 +112,88 @@
         Battle.init();
       }
     });
+  }
 
+  /* =========================================================
+   * 主界面 / 管理 / 图鉴
+   * ========================================================= */
+  let battleStarted = false;
+
+  function el(id) {
+    return document.getElementById(id);
+  }
+
+  function showMenu() {
+    const menu = el('menuScreen');
+    const sub = el('subScreen');
+    if (sub) sub.classList.add('hidden');
+    if (menu) menu.classList.remove('hidden');
+    removeBoot();
+  }
+
+  function hideMenu() {
+    const menu = el('menuScreen');
+    if (menu) menu.classList.add('hidden');
+  }
+
+  function showSub(which) {
+    const menu = el('menuScreen');
+    const sub = el('subScreen');
+    const title = el('subTitle');
+    const hint = el('subHint');
+    if (menu) menu.classList.add('hidden');
+    if (sub) sub.classList.remove('hidden');
+    if (title) title.textContent = which === 'manage' ? '管 理' : '图 鉴';
+    if (hint) hint.textContent = which === 'manage'
+      ? '队伍、技能培养还没做，先留空'
+      : '元素图鉴还没做，先留空';
+  }
+
+  function removeBoot() {
+    const b = el('boot');
+    if (b && b.parentNode) b.parentNode.removeChild(b);
+  }
+
+  function startBattle() {
+    hideMenu();
+    const sub = el('subScreen');
+    if (sub) sub.classList.add('hidden');
+    removeBoot();
+    UI.clearOverlay();
     Battle.init();
+    battleStarted = true;
+  }
+
+  function bindMenu() {
+    const fight = el('menuFight');
+    const manage = el('menuManage');
+    const guide = el('menuGuide');
+    const back = el('subBack');
+
+    if (fight) {
+      fight.addEventListener('click', function () {
+        Sfx.select();
+        startBattle();
+      });
+    }
+    if (manage) {
+      manage.addEventListener('click', function () {
+        Sfx.click();
+        showSub('manage');
+      });
+    }
+    if (guide) {
+      guide.addEventListener('click', function () {
+        Sfx.click();
+        showSub('guide');
+      });
+    }
+    if (back) {
+      back.addEventListener('click', function () {
+        Sfx.click();
+        showMenu();
+      });
+    }
   }
 
   function start() {
@@ -135,7 +215,24 @@
       if (++n > 12) clearInterval(timer);
     }, 150);
 
-    boot();
+    bindMenu();
+
+    /* URL 参数（调试 / 截图用）：
+     *   ?auto=1        直接进战斗
+     *   ?screen=manage 直接看管理页
+     *   ?screen=guide  直接看图鉴页
+     * 默认先进主界面。 */
+    const params = new URLSearchParams(location.search);
+    const screen = params.get('screen');
+    if (screen === 'manage' || screen === 'guide') {
+      bindMenu();
+      showSub(screen);
+    } else if (params.get('auto') === '1') {
+      boot();
+      startBattle();
+    } else {
+      showMenu();
+    }
   }
 
   if (document.readyState === 'loading') {

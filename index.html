@@ -65,6 +65,24 @@
     <!-- 飘字与结算层放在 stage 内，竖屏旋转时跟着一起转 -->
     <div id="fxLayer"></div>
     <div id="overlay" class="overlay hidden"></div>
+
+    <!-- ================= 主界面 ================= -->
+    <!-- 整张「游戏主界面」直接当底图，三个透明按钮压在对应位置 -->
+    <section class="screen menu-screen" id="menuScreen">
+      <img class="menu-bg" src="./assets/menu.jpg" alt="龙之城 主界面">
+      <button type="button" class="menu-hit" id="menuFight" aria-label="战斗"></button>
+      <button type="button" class="menu-hit" id="menuManage" aria-label="管理"></button>
+      <button type="button" class="menu-hit" id="menuGuide" aria-label="图鉴"></button>
+    </section>
+
+    <!-- ================= 管理 / 图鉴（先留空） ================= -->
+    <section class="screen sub-screen hidden" id="subScreen">
+      <div class="sub-box">
+        <div class="sub-title" id="subTitle">管理</div>
+        <div class="sub-hint" id="subHint">这个界面还没做，先留空</div>
+        <button type="button" class="px-btn big" id="subBack">返 回</button>
+      </div>
+    </section>
   </div>
 </div>
 

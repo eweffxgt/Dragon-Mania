@@ -15,3 +15,6 @@ desktop.ini
 tools/*.pem
 tools/*.cer
 tools/*.cmd
+
+# ---------- 本地推广素材（不进仓库） ----------
+推广/

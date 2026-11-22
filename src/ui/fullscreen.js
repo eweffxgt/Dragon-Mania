@@ -1,14 +1,17 @@
 /* =========================================================
- * 网页版（GitHub Pages）强制全屏增强
+ * 网页版（GitHub Pages）全屏增强
  *
  * 只有根目录的 index.html 会加载这个文件；
  * 小工具版本（dist/index.html）里没有这行 <script>，所以完全不受影响。
  *
+ * 按钮位置：战斗信息栏右上角（原来「自动」的位置），
+ * 它在舞台内部，所以竖屏旋转时会跟着画面一起转，方向永远一致。
+ *
  * 行为：
- *   1. 右下角一个「全屏」按钮，点了就进/退全屏
- *   2. 首次点击/触摸页面时自动尝试进全屏（浏览器要求必须有用户手势）
+ *   1. 点「全屏」进入全屏，再点「退出全屏」退出
+ *   2. 首次点击/触摸页面时自动尝试进入全屏（浏览器要求必须有用户手势）
  *   3. 退出全屏后不再自动重进，避免打扰
- *   4. iOS Safari 不支持元素全屏，只隐藏按钮（配合 meta 支持添加到主屏幕后全屏）
+ *   4. iOS Safari 不支持元素全屏 → 隐藏按钮，提示「添加到主屏幕」
  * 关闭自动全屏：网址加 ?fs=0
  * ========================================================= */
 (function () {
@@ -54,39 +57,26 @@
     return /iPad|iPhone|iPod/.test(ua) && !window.MSStream;
   }
 
-  function matches(search) {
-    var q = location.search || '';
-    return q.indexOf(search) >= 0;
+  function hasParam(s) {
+    return (location.search || '').indexOf(s) >= 0;
   }
 
-  var autoWanted = !matches('fs=0');
+  var autoWanted = !hasParam('fs=0');
   var userExited = false;
 
-  /* ---------------- 样式（注入，不碰 pixel.css） ---------------- */
-  function injectStyle() {
-    var css =
-      '.fs-btn{position:fixed;right:10px;bottom:10px;z-index:9990;' +
-      'width:64px;height:30px;line-height:26px;text-align:center;' +
-      'font:700 12px/26px -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;' +
-      'letter-spacing:1px;color:#ffbf29;background:rgba(51,19,24,.82);' +
-      'border:2px solid #610327;box-shadow:0 0 0 2px rgba(255,191,41,.55);' +
-      'cursor:pointer;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent;' +
-      'transition:opacity .2s;opacity:.72;}' +
-      '.fs-btn:hover,.fs-btn:active{opacity:1;}' +
-      '.fs-btn.on{color:#331318;background:#ffbf29;}' +
-      '.fs-tip{position:fixed;left:50%;bottom:52px;transform:translateX(-50%);z-index:9991;' +
-      'padding:6px 14px;font:12px/1.5 -apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;' +
-      'color:#ffbf29;background:rgba(51,19,24,.9);border:2px solid #610327;' +
+  /* ---------------- iOS 提示（唯一注入的样式） ---------------- */
+  function tip(text) {
+    var css = '.fs-tip{position:fixed;left:50%;bottom:14%;transform:translateX(-50%);z-index:9991;' +
+      'padding:7px 15px;font:13px/1.5 -apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;' +
+      'color:#ffbf29;background:rgba(51,19,24,.92);border:2px solid #610327;' +
       'box-shadow:0 0 0 2px #ffbf29;white-space:nowrap;opacity:0;pointer-events:none;' +
-      'transition:opacity .25s;}' +
-      '.fs-tip.show{opacity:1;}';
+      'transition:opacity .25s;}.fs-tip.show{opacity:1;}';
     var st = doc.createElement('style');
     st.type = 'text/css';
-    st.appendChild(doc.createTextNode(css));
+    if (st.styleSheet) st.styleSheet.cssText = css;
+    else st.appendChild(doc.createTextNode(css));
     (doc.head || doc.documentElement).appendChild(st);
-  }
 
-  function tip(text) {
     var t = doc.createElement('div');
     t.className = 'fs-tip';
     t.textContent = text;
@@ -95,54 +85,43 @@
     setTimeout(function () {
       t.className = 'fs-tip';
       setTimeout(function () { if (t.parentNode) t.parentNode.removeChild(t); }, 400);
-    }, 2200);
-  }
-
-  function syncBtn(btn) {
-    var on = !!currentFs();
-    btn.textContent = on ? '退出全屏' : '全屏';
-    btn.className = 'fs-btn' + (on ? ' on' : '');
-    btn.style.width = on ? '84px' : '64px';
-  }
-
-  function tryFullscreen() {
-    if (!canFullscreen() || currentFs()) return;
-    requestFs(root);
+    }, 2600);
   }
 
   function init() {
-    injectStyle();
+    var btn = doc.getElementById('btnFull');
+    var ok = canFullscreen() && !isIosSafari();
 
-    /* ---- 按钮 ---- */
-    if (canFullscreen() && !isIosSafari()) {
-      var btn = doc.createElement('div');
-      btn.className = 'fs-btn';
-      btn.setAttribute('role', 'button');
-      btn.setAttribute('aria-label', '切换全屏');
-      btn.textContent = '全屏';
-      btn.addEventListener('click', function (e) {
-        e.stopPropagation();
-        if (currentFs()) {
-          userExited = true;
-          exitFs();
-        } else {
-          userExited = false;
-          tryFullscreen();
-        }
-      });
-      doc.body.appendChild(btn);
-
-      var onChange = function () { syncBtn(btn); };
-      ['fullscreenchange', 'webkitfullscreenchange', 'mozfullscreenchange', 'MSFullscreenChange']
-        .forEach(function (ev) { doc.addEventListener(ev, onChange); });
+    /* ---- 按钮：不支持就直接藏掉 ---- */
+    if (btn) {
+      if (!ok) {
+        btn.style.display = 'none';
+      } else {
+        var sync = function () {
+          var on = !!currentFs();
+          btn.textContent = on ? '退出全屏' : '全屏';
+          if (on) btn.classList.add('on');
+          else btn.classList.remove('on');
+        };
+        btn.addEventListener('click', function (e) {
+          e.preventDefault();
+          e.stopPropagation();
+          if (typeof Sfx !== 'undefined' && Sfx && Sfx.click) Sfx.click();
+          if (currentFs()) { userExited = true; exitFs(); }
+          else { userExited = false; requestFs(root); }
+        });
+        ['fullscreenchange', 'webkitfullscreenchange', 'mozfullscreenchange', 'MSFullscreenChange']
+          .forEach(function (ev) { doc.addEventListener(ev, sync); });
+        sync();
+      }
     }
 
     /* ---- 首次交互自动进全屏 ---- */
-    if (autoWanted && canFullscreen() && !isIosSafari()) {
+    if (autoWanted && ok) {
       var once = function () {
         doc.removeEventListener('touchstart', once, true);
         doc.removeEventListener('mousedown', once, true);
-        if (!userExited && !currentFs()) tryFullscreen();
+        if (!userExited && !currentFs()) requestFs(root);
       };
       doc.addEventListener('touchstart', once, true);
       doc.addEventListener('mousedown', once, true);
@@ -150,9 +129,7 @@
 
     /* ---- iOS：提示添加到主屏幕 ---- */
     if (isIosSafari() && autoWanted && !window.navigator.standalone) {
-      setTimeout(function () {
-        tip('想要全屏：分享 → 添加到主屏幕');
-      }, 1500);
+      setTimeout(function () { tip('想要全屏：分享 → 添加到主屏幕'); }, 1600);
     }
   }
 

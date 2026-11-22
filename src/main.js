@@ -55,6 +55,7 @@
   }
 
   function boot() {
+    /* 网页版把「自动」按钮换成了「全屏」，这里要能容忍它不存在 */
     const btnAuto = document.getElementById('btnAuto');
     const btnSound = document.getElementById('btnSound');
     const btnRestart = document.getElementById('btnRestart');
@@ -67,16 +68,20 @@
     }
     if (params.get('auto') === '1') {
       Battle.setAuto(true);
-      btnAuto.textContent = '自动 开';
-      btnAuto.classList.add('on');
+      if (btnAuto) {
+        btnAuto.textContent = '自动 开';
+        btnAuto.classList.add('on');
+      }
     }
 
-    btnAuto.addEventListener('click', () => {
-      const on = Battle.setAuto(!Battle.isAuto());
-      btnAuto.textContent = '自动 ' + (on ? '开' : '关');
-      btnAuto.classList.toggle('on', on);
-      Sfx.click();
-    });
+    if (btnAuto) {
+      btnAuto.addEventListener('click', () => {
+        const on = Battle.setAuto(!Battle.isAuto());
+        btnAuto.textContent = '自动 ' + (on ? '开' : '关');
+        btnAuto.classList.toggle('on', on);
+        Sfx.click();
+      });
+    }
 
     btnSound.addEventListener('click', () => {
       const on = Sfx.toggle();

@@ -22,3 +22,9 @@ tools/*.cmd
 # ---------- 本地临时截图 ----------
 tools/*.png
 tools/*.log
+
+# ---------- 视频中间产物 ----------
+tools/frames/
+tools/vid/
+tools/ffmpeg*/
+tools/ffmpeg.zip

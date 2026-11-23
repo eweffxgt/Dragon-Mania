@@ -83,8 +83,11 @@ const Guide = (function () {
     if (next) next.disabled = page >= pageCount() - 1;
   }
 
-  function open() {
+  function open(startPage) {
     page = 0;
+    if (startPage != null && !isNaN(startPage)) {
+      page = Math.max(0, Math.min(pageCount() - 1, Math.floor(startPage)));
+    }
     render();
     var s = el('guideScreen');
     if (s) s.classList.remove('hidden');

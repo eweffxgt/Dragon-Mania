@@ -779,7 +779,10 @@ const Battle = (function () {
     const lv = (typeof PlayerState !== 'undefined')
       ? PlayerState.entry(tpl.name, tpl.level).level
       : tpl.level;
-    const cs = (typeof curveStats === 'function') ? curveStats(lv) : null;
+    const base = (typeof CHAR_BASE !== 'undefined') ? CHAR_BASE[tpl.name] : null;
+    const cs = (typeof curveStats === 'function')
+      ? curveStats(lv, base && base.hp100, base && base.atk100)
+      : null;
     return {
       uid: (side === 'ally' ? 'p' : 'e') + slot,
       side,

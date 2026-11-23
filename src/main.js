@@ -264,7 +264,7 @@
       Manage.open(Number(params.get('page')) || 0);
       showGrowth(params.get('label') || '升 级', null);
     } else if (screen === 'guide') {
-      Guide.open();
+      Guide.open(Number(params.get('page')) || 0);
     } else if (screen === 'manage') {
       Manage.open(Number(params.get('page')) || 0);
     } else if (params.get('auto') === '1') {

@@ -140,7 +140,16 @@
     if (menu) menu.classList.add('hidden');
   }
 
-  /* 养成子界面：升级 / 升星 / 魔符 / 技能（都是空白页） */
+  /* 管理界面点四个按钮：升级进升级界面，其余三个先留空 */
+  function openGrowth(act, label, char) {
+    if (act === 'level') {
+      LevelUp.open(char);
+      return;
+    }
+    showGrowth(label, char);
+  }
+
+  /* 养成子界面：升星 / 魔符 / 技能（空白页） */
   function showGrowth(label, char) {
     const sub = el('subScreen');
     const title = el('subTitle');
@@ -163,6 +172,8 @@
     if (gs) gs.classList.add('hidden');
     const ms = el('manageScreen');
     if (ms) ms.classList.add('hidden');
+    const ls = el('levelScreen');
+    if (ls) ls.classList.add('hidden');
     removeBoot();
     UI.clearOverlay();
     Battle.init();
@@ -227,7 +238,10 @@
     Guide.onClose = showMenu;
     Manage.bind();
     Manage.onClose = showMenu;
-    Manage.setOnOpen(showGrowth);
+    LevelUp.bind();
+    LevelUp.onGrowth = function (act, label, char) { showGrowth(label, char); };
+    LevelUp.onClose = function () { Manage.open(); };
+    Manage.setOnOpen(openGrowth);
 
     /* URL 参数（调试 / 截图用）：
      *   ?auto=1        直接进战斗
@@ -241,7 +255,9 @@
     if (seed) Battle.setSeed(seed);
 
     const screen = params.get('screen');
-    if (screen === 'growth') {
+    if (screen === 'level') {
+      LevelUp.open(GUIDE_DEX[Number(params.get('idx')) || 0], Number(params.get('lv')), Number(params.get('feed')));
+    } else if (screen === 'growth') {
       Manage.open(Number(params.get('page')) || 0);
       showGrowth(params.get('label') || '升 级', null);
     } else if (screen === 'guide') {

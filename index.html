@@ -94,6 +94,15 @@
       <button type="button" class="px-btn manage-back" id="manageBack">返回</button>
     </section>
 
+    <!-- ================= 升级（喂养果实） ================= -->
+    <!-- 左：角色窗口（同管理界面）  右上：等级 + 喂养进度 + FEED  右下：商店 -->
+    <section class="screen level-screen hidden" id="levelScreen">
+      <img class="level-bg" src="./assets/level.png" alt="升级">
+      <div class="level-grid" id="lvGrid"></div>
+      <div class="lv-tip" id="lvTip"></div>
+      <button type="button" class="px-btn level-back" id="lvBack">返回</button>
+    </section>
+
     <!-- ================= 图鉴 ================= -->
     <!-- 整张「图鉴界面」当底图，16 个窗口 + 左右翻页箭头压在上面 -->
     <section class="screen guide-screen hidden" id="guideScreen">
@@ -126,6 +135,7 @@
 <script defer src="./src/ui/render.js"></script>
 <script defer src="./src/ui/guide.js"></script>
 <script defer src="./src/ui/manage.js"></script>
+<script defer src="./src/ui/level.js"></script>
 <script defer src="./src/engine/battle.js"></script>
 <script defer src="./src/main.js"></script>
 <!-- 网页版强制全屏增强：小工具版本（dist/index.html）不加载这一行 -->

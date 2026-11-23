@@ -974,9 +974,16 @@ button { font-family: inherit; }
   border: 0;
   outline: 0;
   cursor: pointer;
+  display: flex;
+  -webkit-box-align: center;
+  align-items: center;
+  -webkit-box-pack: center;
+  justify-content: center;
   font-family: inherit;
   font-size: 8.5px;
-  letter-spacing: 0.5px;
+  line-height: 1;
+  letter-spacing: 0;
+  text-indent: 0.5px;   /* 补掉字距/字宽带来的半像素偏移 */
   color: #fff6e0;
   text-shadow: 1px 1px 0 var(--maroon);
   -webkit-appearance: none;
@@ -989,19 +996,20 @@ button { font-family: inherit; }
 /* 左右翻页键（底图没有箭头，这里画一个像素风小方块） */
 .m-arrow {
   position: absolute;
-  top: 186px;
-  width: 32px;
-  height: 58px;
+  top: 198px;
+  width: 22px;
+  height: 40px;
   margin: 0;
   padding: 0;
   background: var(--maroon);
-  border: 3px solid var(--gold);
+  border: 2px solid var(--gold);
   cursor: pointer;
   -webkit-appearance: none;
   -webkit-tap-highlight-color: transparent;
 }
-.m-arrow.left { left: 5px; }
-.m-arrow.right { right: 5px; }
+/* 居中在左右两侧的黄边里 */
+.m-arrow.left { left: 4.8px; }
+.m-arrow.right { left: 810.8px; }
 .m-arrow::before {
   content: '';
   position: absolute;
@@ -1009,15 +1017,15 @@ button { font-family: inherit; }
   left: 50%;
   width: 0;
   height: 0;
-  margin: -9px 0 0 -9px;
-  border: 9px solid transparent;
+  margin: -7px 0 0 -7px;
+  border: 7px solid transparent;
   border-right-color: var(--gold);
   border-left-width: 0;
 }
 .m-arrow.right::before {
-  margin-left: 0;
+  margin-left: -1px;
   border-right-color: transparent;
-  border-left-width: 9px;
+  border-left-width: 7px;
   border-left-color: var(--gold);
 }
 .m-arrow:hover:not([disabled]) { background: #5c0324; }

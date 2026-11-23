@@ -1071,8 +1071,8 @@ button { font-family: inherit; }
   justify-content: center;
   font-size: 15px;
   font-weight: 700;
-  color: var(--gold);
-  text-shadow: 1px 1px 0 var(--maroon);
+  color: #6b2410;                 /* 和方框边框同一个棕色 */
+  text-shadow: 0 1px 0 rgba(255, 240, 190, 0.45);
 }
 
 /* 喂养进度条：只有 0 / 1/3 / 2/3 三档 */
@@ -1085,8 +1085,8 @@ button { font-family: inherit; }
   left: 0;
   top: 0;
   bottom: 0;
-  background: linear-gradient(#ffe680, #ffbf29 55%, #d89a10);
-  border-right: 2px solid #7a5a06;
+  background: linear-gradient(#e6364f, #c20935 55%, #8f0526);
+  border-right: 2px solid #5c0318;
   transition: width 0.18s linear;
 }
 .lv-bar-seg {
@@ -1094,7 +1094,7 @@ button { font-family: inherit; }
   top: 0;
   bottom: 0;
   width: 2px;
-  background: rgba(255, 230, 128, 0.35);
+  background: rgba(255, 255, 255, 0.28);
 }
 
 /* 每次喂养的消耗说明（进度条下方） */
@@ -1175,7 +1175,7 @@ button { font-family: inherit; }
 /* 买不起 / 喂不起：盖一层暗罩（不吃点击） */
 .lv-mask {
   position: absolute;
-  background: rgba(70, 2, 28, 0.45);
+  background: rgba(48, 2, 18, 0.66);
   pointer-events: none;
 }
 .lv-price.off { color: #a3183a; }

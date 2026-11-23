@@ -157,19 +157,21 @@ const LevelUp = (function () {
       var c = CARDS[k];
       var s = SHOP[k];
       var afford = wallet.gold >= s.price;
-      var ix = c.x + 8, iw = c.w - 16;
+      var ix = c.x + 8, iw = 97;   /* 卡片内金色区域实际宽度 */
 
       html += '<div class="lv-qty" style="left:' + ix + 'px;top:' + (c.y + 14) +
               'px;width:' + iw + 'px;" title="' + s.fruit + ' 果实">' + fmt(s.fruit) + ' 果实</div>';
       html += '<div class="lv-price' + (afford ? '' : ' off') + '" style="left:' + ix +
               'px;top:' + (c.y + 27) + 'px;width:' + iw + 'px;" title="' + s.price + ' 金币">' +
               fmt(s.price) + ' 金</div>';
+      /* BUY 整块（含 4px 边框）实际是 x+6 宽 105，暗罩要和它严格重合 */
+      var bx = c.x + 6, bw = 105, by = c.y + 113, bh = 29;
       html += '<button type="button" class="lv-buy' + (afford ? '' : ' off') + '"' +
-              ' data-idx="' + k + '" style="left:' + (c.x + 8) + 'px;top:' + (c.y + 113) +
-              'px;width:' + iw + 'px;height:29px;"></button>';
+              ' data-idx="' + k + '" style="left:' + bx + 'px;top:' + by +
+              'px;width:' + bw + 'px;height:' + bh + 'px;"></button>';
       if (!afford) {
-        html += '<div class="lv-mask" style="left:' + (c.x + 8) + 'px;top:' + (c.y + 113) +
-                'px;width:' + iw + 'px;height:29px;"></div>';
+        html += '<div class="lv-mask" style="left:' + bx + 'px;top:' + by +
+                'px;width:' + bw + 'px;height:' + bh + 'px;"></div>';
       }
     }
 

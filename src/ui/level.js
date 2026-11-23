@@ -141,10 +141,6 @@ const LevelUp = (function () {
     html += '<button type="button" class="lv-feed' + (canFeed ? '' : ' off') + '" id="lvFeed"' +
             ' style="left:' + FEED.x + 'px;top:' + FEED.y + 'px;width:' + FEED.w +
             'px;height:' + FEED.h + 'px;"></button>';
-    if (!canFeed) {
-      html += '<div class="lv-mask" style="left:' + FEED.x + 'px;top:' + FEED.y +
-              'px;width:' + FEED.w + 'px;height:' + FEED.h + 'px;"></div>';
-    }
 
     /* 金币 / 果实 */
     html += '<div class="lv-bal" style="left:' + GOLD_BOX.x + 'px;top:' + GOLD_BOX.y +
@@ -169,10 +165,6 @@ const LevelUp = (function () {
       html += '<button type="button" class="lv-buy' + (afford ? '' : ' off') + '"' +
               ' data-idx="' + k + '" style="left:' + bx + 'px;top:' + by +
               'px;width:' + bw + 'px;height:' + bh + 'px;"></button>';
-      if (!afford) {
-        html += '<div class="lv-mask" style="left:' + bx + 'px;top:' + by +
-                'px;width:' + bw + 'px;height:' + bh + 'px;"></div>';
-      }
     }
 
     grid.innerHTML = html;

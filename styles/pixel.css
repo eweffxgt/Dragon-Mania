@@ -1171,13 +1171,6 @@ button { font-family: inherit; }
 .lv-buy.off { cursor: default; }
 .lv-buy.off:hover { background: transparent; }
 .lv-buy.off::after { content: ''; }
-
-/* 买不起 / 喂不起：盖一层暗罩（不吃点击） */
-.lv-mask {
-  position: absolute;
-  background: rgba(48, 2, 18, 0.66);
-  pointer-events: none;
-}
 .lv-price.off { color: #a3183a; }
 
 /* 当前所在的养成页按钮高亮 */

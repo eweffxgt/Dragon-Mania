@@ -75,14 +75,25 @@
       <button type="button" class="menu-hit" id="menuGuide" aria-label="图鉴"></button>
     </section>
 
-    <!-- ================= 管理 / 图鉴（先留空） ================= -->
+    <!-- ================= 养成子界面（升级 / 升星 / 魔符 / 技能，先留空） ================= -->
     <section class="screen sub-screen hidden" id="subScreen">
       <div class="sub-box">
-        <div class="sub-title" id="subTitle">管理</div>
+        <div class="sub-title" id="subTitle">升级</div>
         <div class="sub-hint" id="subHint">这个界面还没做，先留空</div>
         <button type="button" class="px-btn big" id="subBack">返 回</button>
       </div>
     </section>
+
+    <!-- ================= 管理 ================= -->
+    <!-- 整张「管理界面」当底图，一页三个角色窗口：全身图 + 头像名字 + 四个养成按钮 -->
+    <section class="screen manage-screen hidden" id="manageScreen">
+      <img class="manage-bg" src="./assets/manage.png" alt="管理">
+      <div class="manage-grid" id="manageGrid"></div>
+      <button type="button" class="m-arrow left" id="managePrev" aria-label="上一页"></button>
+      <button type="button" class="m-arrow right" id="manageNext" aria-label="下一页"></button>
+      <button type="button" class="px-btn manage-back" id="manageBack">返回</button>
+    </section>
+
     <!-- ================= 图鉴 ================= -->
     <!-- 整张「图鉴界面」当底图，16 个窗口 + 左右翻页箭头压在上面 -->
     <section class="screen guide-screen hidden" id="guideScreen">
@@ -114,6 +125,7 @@
 <script defer src="./src/ui/audio.js"></script>
 <script defer src="./src/ui/render.js"></script>
 <script defer src="./src/ui/guide.js"></script>
+<script defer src="./src/ui/manage.js"></script>
 <script defer src="./src/engine/battle.js"></script>
 <script defer src="./src/main.js"></script>
 <!-- 网页版强制全屏增强：小工具版本（dist/index.html）不加载这一行 -->

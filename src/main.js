@@ -126,7 +126,11 @@
   function showMenu() {
     const menu = el('menuScreen');
     const sub = el('subScreen');
+    const gd = el('guideScreen');
+    const mg = el('manageScreen');
     if (sub) sub.classList.add('hidden');
+    if (gd) gd.classList.add('hidden');
+    if (mg) mg.classList.add('hidden');
     if (menu) menu.classList.remove('hidden');
     removeBoot();
   }
@@ -136,15 +140,14 @@
     if (menu) menu.classList.add('hidden');
   }
 
-  function showSub(which) {
-    const menu = el('menuScreen');
+  /* 养成子界面：升级 / 升星 / 魔符 / 技能（都是空白页） */
+  function showGrowth(label, char) {
     const sub = el('subScreen');
     const title = el('subTitle');
     const hint = el('subHint');
-    if (menu) menu.classList.add('hidden');
     if (sub) sub.classList.remove('hidden');
-    if (title) title.textContent = '管 理';
-    if (hint) hint.textContent = '队伍、技能培养还没做，先留空';
+    if (title) title.textContent = label;
+    if (hint) hint.textContent = (char ? char.name + ' · ' : '') + '这个养成界面还没做，先留空';
   }
 
   function removeBoot() {
@@ -158,6 +161,8 @@
     if (sub) sub.classList.add('hidden');
     const gs = el('guideScreen');
     if (gs) gs.classList.add('hidden');
+    const ms = el('manageScreen');
+    if (ms) ms.classList.add('hidden');
     removeBoot();
     UI.clearOverlay();
     Battle.init();
@@ -179,7 +184,7 @@
     if (manage) {
       manage.addEventListener('click', function () {
         Sfx.click();
-        showSub('manage');
+        Manage.open();
       });
     }
     if (guide) {
@@ -191,7 +196,9 @@
     if (back) {
       back.addEventListener('click', function () {
         Sfx.click();
-        showMenu();
+        const sub = el('subScreen');
+        if (sub) sub.classList.add('hidden');
+        Manage.open();
       });
     }
   }
@@ -218,6 +225,9 @@
     bindMenu();
     Guide.bind();
     Guide.onClose = showMenu;
+    Manage.bind();
+    Manage.onClose = showMenu;
+    Manage.setOnOpen(showGrowth);
 
     /* URL 参数（调试 / 截图用）：
      *   ?auto=1        直接进战斗
@@ -231,10 +241,13 @@
     if (seed) Battle.setSeed(seed);
 
     const screen = params.get('screen');
-    if (screen === 'guide') {
+    if (screen === 'growth') {
+      Manage.open(Number(params.get('page')) || 0);
+      showGrowth(params.get('label') || '升 级', null);
+    } else if (screen === 'guide') {
       Guide.open();
     } else if (screen === 'manage') {
-      showSub('manage');
+      Manage.open(Number(params.get('page')) || 0);
     } else if (params.get('auto') === '1') {
       boot();
       startBattle();

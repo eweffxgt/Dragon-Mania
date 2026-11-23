@@ -32,24 +32,29 @@ const LevelUp = (function () {
     { x: 640, y: 198, w: 121, h: 158 }
   ];
 
-  /* ---------- 数值（这几个数是拍板的占位，改这里就能调） ---------- */
-  var START_GOLD = 1000000;      /* 初始金币 100万 */
-  var START_FRUIT = 10000;       /* 初始果实 1万 */
-
-  /* 每次喂养消耗 = 100 × 当前等级 果实 */
+  /* ---------- 数值 ----------
+   * 喂养成本保持「100 × 当前等级 果实 / 次」，每级 3 次。
+   * 成长曲线走 1.2 的等比（见 src/data/curve.js），
+   * 经济平衡靠下面三个礼包的容量来调。
+   *
+   * 按 Lv100 算：一次喂养 10,000 果实，升一级 30,000 果实。
+   *   小包 1 万果实  = 满级后 1 次喂养
+   *   中包 10 万果实 = 约 3.3 级
+   *   大包 100 万果实= 约 33 级
+   * 价格统一 100 金 / 果实。
+   */
   function feedCost(level) {
     return 100 * Math.max(1, level);
   }
 
   var SHOP = [
-    { fruit: 1000, price: 100000 },
-    { fruit: 1000000, price: 100000000 },
-    { fruit: 1000000000, price: 100000000000 }
+    { fruit: 10000, price: 1000000 },
+    { fruit: 100000, price: 10000000 },
+    { fruit: 1000000, price: 100000000 }
   ];
 
-  /* ---------- 运行时状态（内存） ---------- */
-  var wallet = { gold: START_GOLD, fruit: START_FRUIT };
-  var chars = {};           /* name -> { level, feed } */
+  /* ---------- 运行时状态（玩家等级/钱包都在 PlayerState 里） ---------- */
+  var wallet = PlayerState.wallet;
   var current = null;       /* 当前角色 */
   var tipTimer = 0;
 
@@ -57,12 +62,7 @@ const LevelUp = (function () {
 
   function stateOf(ch) {
     if (!ch) return null;
-    var st = chars[ch.name];
-    if (!st) {
-      st = { level: ch.level || 1, feed: 0 };
-      chars[ch.name] = st;
-    }
-    return st;
+    return PlayerState.entry(ch.name, ch.level);
   }
 
   /* 数字缩写：1000 / 100万 / 10亿 */

@@ -14,6 +14,8 @@ const FILES = [
   'src/data/elements.js',
   'src/data/statuses.js',
   'src/data/skills.js',
+  'src/data/curve.js',
+  'src/data/state.js',
   'src/data/characters.js',
   'src/engine/battle.js',
 ];

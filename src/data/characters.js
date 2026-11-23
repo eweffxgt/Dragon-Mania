@@ -12,19 +12,19 @@
  * ========================================================= */
 const PLAYER_TEAM = [
   {
-    name: '酷斯龙', title: '古岩守望', level: 24,
+    name: '酷斯龙', title: '古岩守望', level: 100,
     elements: ['ancient', 'holy', 'steel'],
     hp: 20014343843, atk: 6211348089, crit: 10,
     avatarUrl: 'assets/avatars/kusu.png',
   },
   {
-    name: '博卡拉龙', title: '熔岩行者', level: 22,
+    name: '博卡拉龙', title: '熔岩行者', level: 100,
     elements: ['ancient', 'earth', 'fire'],
     hp: 19945328865, atk: 6142333110, crit: 10,
     avatarUrl: 'assets/avatars/bokara.png',
   },
   {
-    name: '棱镜龙', title: '棱光之影', level: 21,
+    name: '棱镜龙', title: '棱光之影', level: 100,
     elements: ['overlord', 'void', 'light'],
     hp: 20359418737, atk: 5866273195, crit: 10,
     avatarUrl: 'assets/avatars/prism.png',
@@ -33,19 +33,19 @@ const PLAYER_TEAM = [
 
 const ENEMY_TEAM = [
   {
-    name: '莱斯克龙', title: '圣辉巨龙', level: 23,
+    name: '莱斯克龙', title: '圣辉巨龙', level: 100,
     elements: ['ancient', 'holy', 'light'],
     hp: 20014343843, atk: 6211348089, crit: 10,
     avatarUrl: 'assets/avatars/laiske.png',
   },
   {
-    name: '伊奥斯加龙', title: '烈焰幼龙', level: 22,
+    name: '伊奥斯加龙', title: '烈焰幼龙', level: 100,
     elements: ['ancient', 'fire', 'grass'],
     hp: 19945328865, atk: 6142333110, crit: 10,
     avatarUrl: 'assets/avatars/yiao.png',
   },
   {
-    name: '城市守护龙', title: '暗影壁垒', level: 25,
+    name: '城市守护龙', title: '暗影壁垒', level: 100,
     elements: ['overlord', 'dark', 'earth'],
     hp: 20566463673, atk: 6211348089, crit: 10,
     avatarUrl: 'assets/avatars/city.png',

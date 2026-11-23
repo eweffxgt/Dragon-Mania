@@ -256,7 +256,10 @@
 
     const screen = params.get('screen');
     if (screen === 'level') {
-      LevelUp.open(GUIDE_DEX[Number(params.get('idx')) || 0], Number(params.get('lv')), Number(params.get('feed')));
+      var lvP = params.get('lv'), fdP = params.get('feed');
+      LevelUp.open(GUIDE_DEX[Number(params.get('idx')) || 0],
+        lvP == null ? null : Number(lvP),
+        fdP == null ? null : Number(fdP));
     } else if (screen === 'growth') {
       Manage.open(Number(params.get('page')) || 0);
       showGrowth(params.get('label') || '升 级', null);

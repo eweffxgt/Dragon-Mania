@@ -775,20 +775,25 @@ const Battle = (function () {
   /* ================= 构造战斗 ================= */
   function makeChar(tpl, side, slot) {
     const elements = (tpl.elements || [tpl.element]).slice();
+    /* 等级决定属性：血量 / 攻击都走成长曲线（src/data/curve.js） */
+    const lv = (typeof PlayerState !== 'undefined')
+      ? PlayerState.entry(tpl.name, tpl.level).level
+      : tpl.level;
+    const cs = (typeof curveStats === 'function') ? curveStats(lv) : null;
     return {
       uid: (side === 'ally' ? 'p' : 'e') + slot,
       side,
       slot,
       name: tpl.name,
       title: tpl.title,
-      level: tpl.level,
+      level: lv,
       elements,                 // [主元素, 副元素, 副元素]
       element: elements[0],     // 主元素 = 属性，决定被什么克制
       avatarUrl: tpl.avatarUrl || '',
       /* 每局重建角色，对手龙固定 100% 生命开局，不继承上一局的损耗 */
-      maxHp: tpl.hp,
-      hp: tpl.hp,
-      atk: tpl.atk,
+      maxHp: cs ? cs.hp : tpl.hp,
+      hp: cs ? cs.hp : tpl.hp,
+      atk: cs ? cs.atk : tpl.atk,
       crit: tpl.crit == null ? 10 : tpl.crit,
       skills: skillsOfElements(elements),
       statuses: [],

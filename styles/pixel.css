@@ -983,7 +983,6 @@ button { font-family: inherit; }
   font-size: 8.5px;
   line-height: 1;
   letter-spacing: 0;
-  text-indent: 0.5px;   /* 补掉字距/字宽带来的半像素偏移 */
   color: #fff6e0;
   text-shadow: 1px 1px 0 var(--maroon);
   -webkit-appearance: none;
@@ -992,6 +991,13 @@ button { font-family: inherit; }
 .m-btn:hover:not([disabled]) { background: rgba(255, 241, 160, 0.25); }
 .m-btn:active:not([disabled]) { background: rgba(255, 241, 160, 0.42); }
 .m-btn.off { color: rgba(255, 246, 224, 0.3); cursor: default; }
+
+/* 中文字形的墨迹并不在 em 框正中：实测偏右约 0.26em、偏下约 0.18em，
+   这里按 em 反补，字号或整体缩放变化时依然严格居中 */
+.m-btn span {
+  display: inline-block;
+  transform: translate(-0.23em, -0.19em);
+}
 
 /* 左右翻页键（底图没有箭头，这里画一个像素风小方块） */
 .m-arrow {

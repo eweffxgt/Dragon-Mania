@@ -71,7 +71,7 @@ const Manage = (function () {
                 ' data-act="' + b.key + '" data-idx="' + i + '"' +
                 (d ? '' : ' disabled') +
                 ' style="left:' + (wx + b.x) + 'px;top:' + b.y +
-                'px;width:' + BTN_W + 'px;height:' + BTN_H + 'px;">' + b.label + '</button>';
+                'px;width:' + BTN_W + 'px;height:' + BTN_H + 'px;"><span>' + b.label + '</span></button>';
       }
     }
 

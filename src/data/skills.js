@@ -80,12 +80,13 @@ const SKILL_DEFS = {
     ],
   },
 
-  /* 钢铁：终极复仇 —— 反伤 + 阵亡爆发 */
+  /* 钢铁：终极复仇 —— 主光环 125% 反伤 + 副光环 50% 反伤 + 两种光环各减 40% 间接伤害 */
   steel: {
     name: '终极复仇', side: 'ally',
-    desc: '目标 2 回合内被直接攻击时反弹 125% 攻击伤害；若该目标阵亡，对全体敌人造成 80% 攻击伤害。',
+    desc: '主目标 2 回合内被直接攻击时反弹 125% 攻击伤害；其余友军反弹 50%；两种光环都对间接伤害（中毒/灼烧）各减免 40% 攻击。若主目标阵亡，对全体敌人造成 80% 攻击伤害。',
     ops: [
-      { op: 'status', id: 'retaliate', k: 1.25, turns: 2, to: 'target' },
+      { op: 'status', id: 'retaliate', k: 1.25, ik: 0.4, turns: 2, to: 'target' },
+      { op: 'status', id: 'retaliate', k: 0.5, ik: 0.4, turns: 2, to: 'otherAllies' },
       { op: 'status', id: 'vengeance', value: 0.8, turns: 2, to: 'target' },
     ],
   },

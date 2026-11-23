@@ -98,8 +98,8 @@ const Battle = (function () {
       /* 控制类（封印 / 麻痹）不刷新持续时间，避免被无限控住 */
       if (def.id === 'seal' || def.id === 'paralyze') return null;
       s.turns = Math.max(s.turns, def.turns);
-      if (def.id === 'guard') {
-        /* 减伤额度不叠加，取更高的一档 */
+      if (def.id === 'guard' || def.id === 'retaliate') {
+        /* 减伤 / 反伤光环：额度不叠加，取更高的一档 */
         s.value = Math.max(s.value || 0, def.value || 0);
         s.indirect = Math.max(s.indirect || 0, def.indirect || 0);
       } else if ((def.value || 0) > 0) {
@@ -196,6 +196,14 @@ const Battle = (function () {
       dmg -= guarded;
     }
 
+    /* 复仇反击光环：对间接伤害（中毒/灼烧）按 40% 攻击封顶减免，同样不消耗 */
+    let rtCut = 0;
+    const rtS = statusOf(target, 'retaliate');
+    if (rtS && opts.dot && dmg > 0 && (rtS.indirect || 0) > 0) {
+      rtCut = Math.min(rtS.indirect, dmg);
+      dmg -= rtCut;
+    }
+
     const sh = statusOf(target, 'shield');
     if (sh && dmg > 0) {
       absorbed = Math.min(sh.value, dmg);
@@ -212,6 +220,7 @@ const Battle = (function () {
     UI.refresh(st);
 
     if (guarded > 0) UI.floatText(target.uid, '减伤 -' + fmtNum(guarded), 'shield');
+    if (rtCut > 0) UI.floatText(target.uid, '光环 -' + fmtNum(rtCut), 'shield');
     if (absorbed > 0) UI.floatText(target.uid, '盾 -' + fmtNum(absorbed), 'shield');
     if (dmg > 0) {
       const multTxt = opts.mult > 1 ? '×1.5 ' : (opts.mult < 1 ? '×½ ' : '');
@@ -226,10 +235,12 @@ const Battle = (function () {
     if (opts.dot) {
       const d = STATUSES[opts.dot];
       if (dmg > 0) {
-        UI.log('　' + nameHtml(target) + ' 受到【' + d.name + '】侵蚀 <b class="num">' + fmtNum(dmg) + '</b> 点伤害', 'log-dmg');
+        UI.log('　' + nameHtml(target) + ' 受到【' + d.name + '】侵蚀 <b class="num">' + fmtNum(dmg) + '</b> 点伤害'
+          + (rtCut > 0 ? '（反伤光环减免 ' + fmtNum(rtCut) + '）' : ''), 'log-dmg');
       } else {
         UI.log('　' + nameHtml(target) + ' 的【' + d.name + '】伤害被完全吸收'
-          + (guarded > 0 ? '（石之守护 ' + fmtNum(guarded) + '）' : ''), 'log-status');
+          + (guarded > 0 ? '（石之守护 ' + fmtNum(guarded) + '）' : '')
+          + (rtCut > 0 ? '（反伤光环 ' + fmtNum(rtCut) + '）' : ''), 'log-status');
       }
       Sfx.hit();
     } else if (dmg > 0) {
@@ -318,7 +329,7 @@ const Battle = (function () {
   /* 状态值显示：护盾/中毒这类是点数，其它是百分比 */
   function fmtVal(id, v) {
     if (id === 'shield' || id === 'poison' || id === 'regen' || id === 'burn') return fmtNum(v);
-    if (id === 'guard') return fmtNum(v);
+    if (id === 'guard' || id === 'retaliate') return fmtNum(v);
     if (id === 'vengeance') return Math.round(v * 100) + '%';
     return v + '%';
   }
@@ -655,6 +666,7 @@ const Battle = (function () {
       case 'maxhp_up': return pct * cnt * 1.0;
       case 'shield': return (op.k || 0) * cnt * 0.6;
       case 'guard': return (op.k || 0) * cnt * 1.1;
+      case 'retaliate': return (op.k || 0) * turns * cnt * 0.8;
       case 'poison': return (op.k || 0) * turns * 0.55 * cnt;
       case 'seal': return 0.85;
       case 'paralyze': return 0.5;

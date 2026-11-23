@@ -46,7 +46,8 @@ const STATUSES = {
   },
   retaliate: {
     name: '复仇反击', short: '反击', kind: 'buff', color: '#ffa14d',
-    val: (v) => `被直接攻击时反弹 ${fmtNum(v)} 点伤害`,
+    val: (v, s) => `被直接攻击时反弹 ${fmtNum(v)} 点伤害`
+      + (s && s.indirect ? `；间接伤害减免 ${fmtNum(s.indirect)}` : ''),
   },
   taunt: {
     name: '嘲讽', short: '嘲讽', kind: 'buff', color: '#ffd166',

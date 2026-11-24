@@ -602,16 +602,6 @@ const Battle = (function () {
       return;
     }
 
-    /* 持续伤害 */
-    const dots = ['poison', 'burn'];
-    for (let i = 0; i < dots.length; i++) {
-      const s = statusOf(actor, dots[i]);
-      if (!s) continue;
-      await damage(st, actor, s.value, { dot: dots[i] });
-      if (st.over || st.token !== token) return;
-      if (!actor.alive) { await endOfTurn(st, actor); return; }
-    }
-
     /* 行动 */
     if (actor.side === 'ally' && !autoPlay) {
       st.phase = 'awaiting';
@@ -638,11 +628,44 @@ const Battle = (function () {
 
   async function endOfTurn(st, actor) {
     if (st.token !== token) return;
-    const regen = statusOf(actor, 'regen');
-    if (regen && actor.alive) await heal(st, actor, regen.value, '回春');
-    tickStatuses(actor);
     UI.refresh(st);
     await sleep(110);
+  }
+
+  /* ================= 大回合结算 =================
+   * 一个「大回合」= 场上所有角色各行动一次。
+   * 持续伤害和状态倒计时都放在这里统一结算，
+   * 这样「2 回合」的增益 = 完整覆盖 2 个大回合。 */
+  async function endOfRound(st) {
+    if (st.token !== token || st.over) return;
+    const chars = st.chars.slice();
+
+    /* 1) 持续伤害（中毒 / 灼烧） */
+    const dots = ['poison', 'burn'];
+    for (let i = 0; i < chars.length; i++) {
+      const c = chars[i];
+      if (!c.alive || st.over || st.token !== token) continue;
+      for (let k = 0; k < dots.length; k++) {
+        const s = statusOf(c, dots[k]);
+        if (!s) continue;
+        await damage(st, c, s.value, { dot: dots[k] });
+        if (st.over || st.token !== token) return;
+        if (!c.alive) break;
+      }
+    }
+
+    /* 2) 回春 */
+    for (let i = 0; i < chars.length; i++) {
+      const c = chars[i];
+      if (!c.alive || st.over) continue;
+      const regen = statusOf(c, 'regen');
+      if (regen) await heal(st, c, regen.value, '回春');
+    }
+
+    /* 3) 全场状态倒计时 -1 */
+    chars.forEach((c) => { if (c.alive) tickStatuses(c); });
+    UI.refresh(st);
+    await sleep(140);
   }
 
   /* ================= 自动出招（敌方 AI / 自动战斗） ================= */
@@ -751,7 +774,11 @@ const Battle = (function () {
     while (!st.over && st.token === token) {
       const idx = nextIndex(st, st.turnIndex);
       if (idx < 0) break;
-      if (st.turnIndex >= 0 && idx <= st.turnIndex) st.round += 1;
+      if (st.turnIndex >= 0 && idx <= st.turnIndex) {
+        await endOfRound(st);
+        if (st.over || st.token !== token) break;
+        st.round += 1;
+      }
       if (st.round === 11) {
         UI.log('<span class="tag-turn">◆</span> 战场进入白热化：此后每回合全场伤害提升 18%！', 'log-sys');
       }

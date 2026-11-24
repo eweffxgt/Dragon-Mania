@@ -410,14 +410,14 @@ const UI = (function () {
         '<div class="ov-reward">获得 <b>' + fmtNum(reward) + '</b> 金币</div>' +
         '<div class="ov-sub">共经过 ' + st.round + ' 回合</div>' +
         '<div class="ov-list">' + rows + '</div>' +
-        '<button type="button" class="px-btn big" id="ovRestart">再 战 一 次</button>' +
+        '<button type="button" class="px-btn big" id="ovExit">回 到 主 界 面</button>' +
       '</div>';
     E.overlay.classList.remove('hidden');
-    const btn = E.overlay.querySelector('#ovRestart');
+    const btn = E.overlay.querySelector('#ovExit');
     if (btn) {
       btn.addEventListener('click', () => {
         clearOverlay();
-        Battle.init();
+        if (UI.onExit) UI.onExit();
       });
     }
   }

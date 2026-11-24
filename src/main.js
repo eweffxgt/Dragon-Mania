@@ -244,6 +244,9 @@
       }
     });
 
+    /* 战斗结算的「回到主界面」 */
+    UI.onExit = function () { showMenu(); };
+
     bindMenu();
     Guide.bind();
     Guide.onClose = showMenu;

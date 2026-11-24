@@ -193,6 +193,7 @@ const SKILL_BY_ELEMENT = {};
       side: def.side,
       desc: def.desc,
       ops: def.ops,
+      preOps: def.preOps || [],      /* 伤害前的前置效果（燃烧殆尽用来先驱散） */
       hasDamage: hasDamage,
       dmgK: dmgK,
       iconUrl: (ELEMENTS[el] && ELEMENTS[el].iconUrl) || '',

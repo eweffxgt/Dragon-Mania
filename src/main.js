@@ -164,7 +164,7 @@
     if (b && b.parentNode) b.parentNode.removeChild(b);
   }
 
-  function startBattle() {
+  function startBattle(team) {
     hideMenu();
     const sub = el('subScreen');
     if (sub) sub.classList.add('hidden');
@@ -174,9 +174,11 @@
     if (ms) ms.classList.add('hidden');
     const ls = el('levelScreen');
     if (ls) ls.classList.add('hidden');
+    const ss = el('selectScreen');
+    if (ss) ss.classList.add('hidden');
     removeBoot();
     UI.clearOverlay();
-    Battle.init();
+    Battle.init(team);
     battleStarted = true;
   }
 
@@ -189,7 +191,7 @@
     if (fight) {
       fight.addEventListener('click', function () {
         Sfx.select();
-        startBattle();
+        Select.open();          /* 先选阵容，再进战斗 */
       });
     }
     if (manage) {
@@ -238,6 +240,9 @@
     Guide.onClose = showMenu;
     Manage.bind();
     Manage.onClose = showMenu;
+    Select.bind();
+    Select.onConfirm = function (team) { startBattle(team); };
+    Select.onClose = showMenu;
     LevelUp.bind();
     LevelUp.onGrowth = function (act, label, char) { showGrowth(label, char); };
     LevelUp.onClose = function () { Manage.open(); };
@@ -255,7 +260,9 @@
     if (seed) Battle.setSeed(seed);
 
     const screen = params.get('screen');
-    if (screen === 'level') {
+    if (screen === 'select') {
+      Select.open();
+    } else if (screen === 'level') {
       var lvP = params.get('lv'), fdP = params.get('feed');
       LevelUp.open(GUIDE_DEX[Number(params.get('idx')) || 0],
         lvP == null ? null : Number(lvP),

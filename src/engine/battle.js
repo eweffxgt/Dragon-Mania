@@ -804,12 +804,27 @@ const Battle = (function () {
     };
   }
 
-  function init() {
+  /* 玩家当前阵容（由角色选择界面传入，不传就沿用上一次 / 默认队伍） */
+  let teamTpls = null;
+
+  function init(team) {
     token += 1;
     resolver = null;
 
+    if (team && team.length) {
+      teamTpls = team.map((c) => ({
+        name: c.name,
+        title: c.title || '',
+        level: c.level || 100,
+        elements: (c.elements || []).slice(),
+        crit: 10,
+        avatarUrl: c.avatarUrl || c.avatar || ''
+      }));
+    }
+
     const chars = [];
-    PLAYER_TEAM.forEach((t, i) => chars.push(makeChar(t, 'ally', i)));
+    const playerSrc = teamTpls || PLAYER_TEAM;
+    playerSrc.forEach((t, i) => chars.push(makeChar(t, 'ally', i)));
     ENEMY_TEAM.forEach((t, i) => chars.push(makeChar(t, 'enemy', i)));
 
     const byUid = {};

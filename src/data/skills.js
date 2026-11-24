@@ -136,20 +136,22 @@ const SKILL_DEFS = {
   /* 古代：大量汲取 —— 汲取伤害 + 削攻 + 群体增伤 */
   ancient: {
     name: '大量汲取', side: 'enemy',
-    desc: '先造成 100% 攻击伤害，并使目标造成伤害 -60%（2 回合）；同时全体友军造成伤害 +25%（2 回合）。',
+    desc: '先造成 100% 攻击伤害，并使目标造成伤害 -60%（3 回合）；同时全体友军造成伤害 +25%（3 回合）。',
+    /* 时长 3 回合：两技能交替（神圣↔古代）时，效果正好撑到下次施放才结束 */
     ops: [
-      { op: 'status', id: 'weaken', value: 60, turns: 2, to: 'target' },
-      { op: 'status', id: 'atk_up', value: 25, turns: 2, to: 'allies' },
+      { op: 'status', id: 'weaken', value: 60, turns: 3, to: 'target' },
+      { op: 'status', id: 'atk_up', value: 25, turns: 3, to: 'allies' },
     ],
   },
 
   /* 神圣：天降鸿福 —— 全体增伤 + 生命上限 */
   holy: {
     name: '天降鸿福', side: 'ally',
-    desc: '全体友军造成伤害 +50%，生命上限 +50%，持续 2 回合。',
+    desc: '全体友军造成伤害 +50%，生命上限 +50%，持续 3 回合。',
+    /* 时长 3 回合：两技能交替时正好接上下一次施放，中间不断档 */
     ops: [
-      { op: 'status', id: 'atk_up', value: 50, turns: 2, to: 'allies' },
-      { op: 'status', id: 'maxhp_up', value: 50, turns: 2, to: 'allies' },
+      { op: 'status', id: 'atk_up', value: 50, turns: 3, to: 'allies' },
+      { op: 'status', id: 'maxhp_up', value: 50, turns: 3, to: 'allies' },
     ],
   },
 

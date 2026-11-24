@@ -94,6 +94,7 @@ const Battle = (function () {
       return null;
     }
     let s = statusOf(char, def.id);
+    const isNew = !s;
     if (s) {
       /* 控制类（封印 / 麻痹）不刷新持续时间，避免被无限控住 */
       if (def.id === 'seal' || def.id === 'paralyze') return null;
@@ -116,7 +117,8 @@ const Battle = (function () {
       };
       char.statuses.push(s);
     }
-    if (def.id === 'maxhp_up') {
+    /* 生命上限只在【首次获得】时加上去；刷新只延长时间，不再叠倍 */
+    if (def.id === 'maxhp_up' && isNew) {
       const add = Math.round(char.maxHp * ((def.value || 0) / 100));
       char.maxHp += add;
       char.hp += add;

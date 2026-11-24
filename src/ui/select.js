@@ -73,40 +73,29 @@ const Select = (function () {
     var strip = el('selStrip');
     if (!strip) return;
 
-    /* 鼠标滚轮 → 横向滚动 */
+    /* 鼠标滚轮也能滚（触屏用原生滑动） */
     strip.addEventListener('wheel', function (e) {
       if (e.deltaY === 0) return;
       strip.scrollLeft += e.deltaY;
       e.preventDefault();
     }, { passive: false });
 
-    /* 按住拖动 */
-    var down = false, startX = 0, startLeft = 0, moved = 0;
-    strip.addEventListener('pointerdown', function (e) {
-      down = true; moved = 0;
-      startX = e.clientX; startLeft = strip.scrollLeft;
-      strip.classList.add('dragging');
-    });
-    window.addEventListener('pointermove', function (e) {
-      if (!down) return;
-      var dx = e.clientX - startX;
-      if (Math.abs(dx) > moved) moved = Math.abs(dx);
-      strip.scrollLeft = startLeft - dx;
-    });
-    window.addEventListener('pointerup', function () {
-      if (!down) return;
-      down = false;
-      strip.classList.remove('dragging');
-    });
-
     var cells = strip.querySelectorAll('.sel-cell');
     for (var i = 0; i < cells.length; i++) {
       cells[i].addEventListener('click', function (e) {
-        if (moved > 6) return;            /* 拖动时不触发选择 */
         var name = e.currentTarget.getAttribute('data-name');
         pickByName(name);
       });
     }
+  }
+
+  /* 左右翻页：每次滚动整个头像栏的一半 */
+  function scrollByHalf(dir) {
+    var strip = el('selStrip');
+    if (!strip) return;
+    var step = Math.max(80, Math.round(strip.clientWidth / 2));
+    strip.scrollLeft += dir * step;
+    if (typeof Sfx !== 'undefined' && Sfx.click) Sfx.click();
   }
 
   function pickByName(name) {
@@ -177,6 +166,10 @@ const Select = (function () {
     var yes = el('selYes');
     var no = el('selNo');
     var back = el('selBack');
+    var prev = el('selPrev');
+    var next = el('selNext');
+    if (prev) prev.addEventListener('click', function () { scrollByHalf(-1); });
+    if (next) next.addEventListener('click', function () { scrollByHalf(1); });
     if (yes) yes.addEventListener('click', confirmYes);
     if (no) no.addEventListener('click', confirmNo);
     if (back) {

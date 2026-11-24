@@ -43,7 +43,7 @@
     <section class="center">
       <div class="log-wrap">
         <div class="log-head">
-          <span class="hud-round">回合 <b id="roundNum">1</b></span>
+          <span class="hud-round">回合 <b id="roundNum">1</b>　击杀 <b id="killNum">0</b></span>
           <div class="hud-order" id="orderBar"></div>
           <span class="cards-hint" id="cardsHint">准备中…</span>
           <div class="hud-btns">
@@ -69,7 +69,7 @@
     <!-- ================= 主界面 ================= -->
     <!-- 整张「游戏主界面」直接当底图，三个透明按钮压在对应位置 -->
     <section class="screen menu-screen" id="menuScreen">
-      <img class="menu-bg" src="./assets/menu.jpg" alt="龙之城 主界面">
+      <img class="menu-bg" src="./assets/menu.png" alt="龙之城 主界面">
       <button type="button" class="menu-hit" id="menuFight" aria-label="战斗"></button>
       <button type="button" class="menu-hit" id="menuManage" aria-label="管理"></button>
       <button type="button" class="menu-hit" id="menuGuide" aria-label="图鉴"></button>
@@ -99,6 +99,8 @@
     <section class="screen select-screen hidden" id="selectScreen">
       <img class="select-bg" src="./assets/select.png" alt="角色选择">
       <div class="select-grid" id="selectGrid"></div>
+      <button type="button" class="m-arrow sel-arrow left" id="selPrev" aria-label="向左"></button>
+      <button type="button" class="m-arrow sel-arrow right" id="selNext" aria-label="向右"></button>
       <button type="button" class="px-btn select-back" id="selBack">返回</button>
 
       <!-- 确认阵容弹窗 -->
@@ -150,6 +152,7 @@
 <script defer src="./src/data/skills.js"></script>
 <script defer src="./src/data/stats.js"></script>
 <script defer src="./src/data/curve.js"></script>
+<script defer src="./src/platform/storage.js"></script>
 <script defer src="./src/data/state.js"></script>
 <script defer src="./src/data/characters.js"></script>
 <script defer src="./src/data/guide.js"></script>

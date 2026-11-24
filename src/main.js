@@ -235,6 +235,15 @@
       if (++n > 12) clearInterval(timer);
     }, 150);
 
+    /* 读存档（同步读本地，异步再尝试小工具 Storage） */
+    PlayerState.load().then(function (fromRemote) {
+      if (fromRemote) {
+        /* 首次在新设备上：拿到云端档后重建一次界面数据 */
+        if (typeof Manage !== 'undefined') Manage.render();
+        if (typeof LevelUp !== 'undefined') LevelUp.render();
+      }
+    });
+
     bindMenu();
     Guide.bind();
     Guide.onClose = showMenu;

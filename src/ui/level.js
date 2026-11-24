@@ -48,9 +48,9 @@ const LevelUp = (function () {
   }
 
   var SHOP = [
-    { fruit: 10000, price: 1000000 },
-    { fruit: 100000, price: 10000000 },
-    { fruit: 1000000, price: 100000000 }
+    { fruit: 10000, price: 100000 },
+    { fruit: 100000, price: 1000000 },
+    { fruit: 1000000, price: 10000000 }
   ];
 
   /* ---------- 运行时状态（玩家等级/钱包都在 PlayerState 里） ---------- */
@@ -210,6 +210,7 @@ const LevelUp = (function () {
       st.feed = 0;
       tip('升级！Lv.' + st.level);
     }
+    PlayerState.save();
     if (typeof Sfx !== 'undefined' && Sfx.select) Sfx.select();
     render();
   }
@@ -224,6 +225,7 @@ const LevelUp = (function () {
     wallet.gold -= s.price;
     wallet.fruit += s.fruit;
     tip('购买成功：+' + fmt(s.fruit) + ' 果实');
+    PlayerState.save();
     if (typeof Sfx !== 'undefined' && Sfx.select) Sfx.select();
     render();
   }

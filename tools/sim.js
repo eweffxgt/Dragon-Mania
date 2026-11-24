@@ -17,6 +17,7 @@ const FILES = [
   'src/data/stats.js',
   'src/data/curve.js',
   'src/data/state.js',
+  'src/data/guide.js',
   'src/data/characters.js',
   'src/engine/battle.js',
 ];
@@ -24,7 +25,7 @@ const FILES = [
 let onFinished = null;
 
 global.UI = {
-  build() {}, refresh() {}, renderCards() {}, setHint() {},
+  build() {}, refresh() {}, rebuildChar() {}, renderCards() {}, setHint() {},
   showTargets() {}, clearTargets() {}, log() {}, floatText() {},
   shake() {}, lunge() {}, cast() {}, clearOverlay() {},
   gameOver(result, st) {
@@ -53,11 +54,13 @@ Battle.setAuto(true);
 
 function runOne() {
   return new Promise((resolve, reject) => {
-    const timer = setTimeout(() => reject(new Error('战斗超时，可能卡死')), 15000);
+    const timer = setTimeout(() => reject(new Error('战斗超时，可能卡死')), 120000);
     onFinished = (result, st) => {
       clearTimeout(timer);
       resolve({
         result,
+        kills: st.kills || 0,
+        reward: st.reward || 0,
         rounds: st.round,
         allyHp: st.chars.filter((c) => c.side === 'ally').reduce((a, c) => a + Math.max(0, c.hp), 0),
         allyMax: st.chars.filter((c) => c.side === 'ally').reduce((a, c) => a + c.maxHp, 0),
@@ -71,15 +74,12 @@ function runOne() {
 }
 
 (async () => {
-  const stats = { win: 0, lose: 0, rounds: [], survivors: [], dmgAlly: 0, dmgEnemy: 0, byUid: {} };
+  const stats = { win: 0, lose: 0, kills: 0, rounds: [], survivors: [], dmgAlly: 0, dmgEnemy: 0, byUid: {} };
   for (let i = 0; i < N; i++) {
     const r = await runOne();
-    if (r.result === 'win') {
-      stats.win++;
-      stats.survivors.push(r.allyHp / r.allyMax);
-    } else {
-      stats.lose++;
-    }
+    stats.lose++;
+    stats.kills = (stats.kills || 0) + r.kills;
+    stats.rounds.push(r.rounds);
     stats.rounds.push(r.rounds);
     stats.dmgAlly += r.dmgAlly;
     stats.dmgEnemy += r.dmgEnemy;
@@ -87,12 +87,14 @@ function runOne() {
     if (r.rounds > 60) console.log('!! 异常长局：' + r.rounds + ' 回合');
   }
 
+  const fmtComma = (n) => Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
   const avg = (a) => (a.length ? a.reduce((x, y) => x + y, 0) / a.length : 0);
   const sorted = stats.rounds.slice().sort((a, b) => a - b);
 
   console.log('---------------------------------------');
   console.log(`场次        ${N}`);
-  console.log(`我方胜率    ${((stats.win / N) * 100).toFixed(1)}%`);
+  console.log(`场均击杀    ${(stats.kills / N).toFixed(1)} 个`);
+  console.log(`场均金币    ${fmtComma(stats.kills / N * 10000)}`);
   console.log(`平均回合    ${avg(stats.rounds).toFixed(1)}`);
   console.log(`最短 / 最长  ${sorted[0]} / ${sorted[sorted.length - 1]}`);
   console.log(`中位回合    ${sorted[Math.floor(sorted.length / 2)]}`);

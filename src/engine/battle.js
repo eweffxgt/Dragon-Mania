@@ -280,6 +280,10 @@ const Battle = (function () {
       Sfx.ko();
       await sleep(420);
       if (revenge && st.token === token) await triggerVengeance(st, target, revenge);
+      /* 车轮战：敌人倒下立刻有人顶上来 */
+      if (target.side === 'enemy' && !st.over && st.token === token) {
+        await respawn(st, target);
+      }
     }
 
     checkEnd(st);
@@ -548,13 +552,13 @@ const Battle = (function () {
   }
 
   /* ================= 回合流程 ================= */
+  /* 车轮战：敌方永不停歇，只有我方全灭才会结束 */
   function checkEnd(st) {
     const allyAlive = aliveOf(st, 'ally').length > 0;
-    const enemyAlive = aliveOf(st, 'enemy').length > 0;
-    if (allyAlive && enemyAlive) return false;
+    if (allyAlive) return false;
     st.over = true;
     st.phase = 'over';
-    st.result = allyAlive ? 'win' : 'lose';
+    st.result = 'lose';
     return true;
   }
 
@@ -750,11 +754,9 @@ const Battle = (function () {
         UI.log('<span class="tag-turn">◆</span> 战场进入白热化：此后每回合全场伤害提升 18%！', 'log-sys');
       }
       if (st.round > 40) {
-        const ah = aliveOf(st, 'ally').reduce((a, c) => a + c.hp, 0);
-        const eh = aliveOf(st, 'enemy').reduce((a, c) => a + c.hp, 0);
         st.over = true;
-        st.result = ah >= eh ? 'win' : 'lose';
-        UI.log('<span class="tag-turn">◆</span> 战斗超时，按剩余总生命判定：' + (st.result === 'win' ? '我方获胜' : '敌方获胜'), 'log-sys');
+        st.result = 'lose';
+        UI.log('<span class="tag-turn">◆</span> 撑满 40 回合，战斗结束', 'log-sys');
         break;
       }
       st.turnIndex = idx;
@@ -765,20 +767,27 @@ const Battle = (function () {
     if (st.token !== token) return;
     checkEnd(st);
     st.phase = 'over';
+    st.kills = kills;
+    st.reward = kills * KILL_REWARD;
+    if (typeof PlayerState !== 'undefined' && st.reward > 0) {
+      PlayerState.wallet.gold += st.reward;
+      PlayerState.save();
+    }
     UI.setHint('战斗结束', false);
     UI.clearTargets();
     await sleep(400);
     UI.gameOver(st.result, st);
-    if (st.result === 'win') Sfx.win(); else Sfx.lose();
+    Sfx.lose();
   }
 
   /* ================= 构造战斗 ================= */
   function makeChar(tpl, side, slot) {
     const elements = (tpl.elements || [tpl.element]).slice();
     /* 等级决定属性：血量 / 攻击都走成长曲线（src/data/curve.js） */
-    const lv = (typeof PlayerState !== 'undefined')
+    /* 我方等级来自玩家数据；敌人等级由车轮战决定，不能和我方共用 */
+    const lv = (side === 'ally' && typeof PlayerState !== 'undefined')
       ? PlayerState.entry(tpl.name, tpl.level).level
-      : tpl.level;
+      : (tpl.level || 1);
     const base = (typeof CHAR_BASE !== 'undefined') ? CHAR_BASE[tpl.name] : null;
     const cs = (typeof curveStats === 'function')
       ? curveStats(lv, base && base.hp100, base && base.atk100)
@@ -804,6 +813,60 @@ const Battle = (function () {
     };
   }
 
+  /* ================= 车轮战 =================
+   * 敌人一死立刻有新的补位：角色随机，等级按「第 N 个上场的敌人」算：
+   *   等级 = min(100, 10 × ceil(N / 6))
+   * 也就是前 6 个 10 级、7~12 个 20 级……到 100 级封顶。 */
+  const WAVE_STEP = 6;          /* 每 6 个敌人涨一档 */
+  const WAVE_LEVEL = 5;         /* 每档 +5 级：5 / 10 / 15 … 100 封顶 */
+  const KILL_REWARD = 10000;    /* 每击杀一个敌人奖励的金币 */
+
+  function enemyLevelOf(index) {
+    var lv = WAVE_LEVEL * Math.ceil(index / WAVE_STEP);
+    return Math.min(100, Math.max(1, lv));
+  }
+
+  function randomEnemyTpl(index) {
+    var dex = (typeof GUIDE_DEX !== 'undefined' && GUIDE_DEX.length) ? GUIDE_DEX : null;
+    if (!dex) return null;
+    var pick = dex[Math.floor(rnd() * dex.length) % dex.length];
+    return {
+      name: pick.name,
+      title: '',
+      level: enemyLevelOf(index),
+      elements: pick.elements.slice(),
+      crit: 10,
+      avatarUrl: pick.avatar
+    };
+  }
+
+  /* 车轮战计数器：spawned = 已上场过的敌人总数，kills = 已击杀数 */
+  let spawned = 3;
+  let kills = 0;
+
+  /* 补位：同一个槽位换成新的敌人，返回新角色 */
+  async function respawn(st, dead) {
+    if (st.over || st.token !== token) return;
+    spawned += 1;
+    kills += 1;
+    st.kills = kills;
+
+    const tpl = randomEnemyTpl(spawned);
+    if (!tpl) return;
+    const fresh = makeChar(tpl, 'enemy', dead.slot);
+    fresh.uid = dead.uid;                    /* 复用槽位 uid */
+
+    const idx = st.chars.indexOf(dead);
+    if (idx >= 0) st.chars[idx] = fresh;
+    st.byUid[fresh.uid] = fresh;
+
+    UI.rebuildChar(st, fresh);
+    UI.log('　<span class="tag-turn">援军</span> ' + nameHtml(fresh) +
+      ' 顶了上来（Lv.' + fresh.level + '）　·　已击杀 ' + kills, 'log-sys');
+    Sfx.cast();
+    await sleep(220);
+  }
+
   /* 玩家当前阵容（由角色选择界面传入，不传就沿用上一次 / 默认队伍） */
   let teamTpls = null;
 
@@ -825,7 +888,13 @@ const Battle = (function () {
     const chars = [];
     const playerSrc = teamTpls || PLAYER_TEAM;
     playerSrc.forEach((t, i) => chars.push(makeChar(t, 'ally', i)));
-    ENEMY_TEAM.forEach((t, i) => chars.push(makeChar(t, 'enemy', i)));
+
+    /* 敌方开局 3 个都是 10 级（第 1~3 个上场的敌人） */
+    spawned = 3;
+    kills = 0;
+    for (let i = 0; i < 3; i++) {
+      chars.push(makeChar(randomEnemyTpl(i + 1), 'enemy', i));
+    }
 
     const byUid = {};
     chars.forEach((c) => { byUid[c.uid] = c; });
@@ -843,6 +912,8 @@ const Battle = (function () {
       pendingCard: null,
       auto: autoPlay,
       stats: { ally: { dmg: 0 }, enemy: { dmg: 0 }, byUid: {} },
+      kills,
+      reward: 0,
       token,
     };
 

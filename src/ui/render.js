@@ -22,6 +22,7 @@ const UI = (function () {
       order: document.getElementById('orderBar'),
       log: document.getElementById('log'),
       round: document.getElementById('roundNum'),
+    kills: document.getElementById('killNum'),
       fx: document.getElementById('fxLayer'),
       overlay: document.getElementById('overlay'),
     };
@@ -175,6 +176,7 @@ const UI = (function () {
   function refresh(st) {
     if (!E) return;
     E.round.textContent = st.round;
+    if (E.kills) E.kills.textContent = st.kills || 0;
 
     st.chars.forEach((c) => updatePanel(c, st));
 
@@ -187,6 +189,29 @@ const UI = (function () {
         el.classList.toggle('dead', !c.alive);
       });
     }
+  }
+
+  /* ---------------- 车轮战：槽位换人后重建该面板 ---------------- */
+  function rebuildChar(st, c) {
+    if (!E) return;
+    const old = R.panels[c.uid];
+    if (!old || !old.el || !old.el.parentNode) return;
+
+    const fresh = createPanel(c);          /* 内部会重建 R.panels[c.uid] */
+    old.el.parentNode.replaceChild(fresh, old.el);
+
+    /* 头像若用 canvas 需要重绘（现在都用图片，保底处理） */
+    const cv = fresh.querySelector('canvas.avatar');
+    if (cv) PixelArt.drawAvatar(cv, c);
+
+    /* 出招顺序条上的颜色 / 提示跟着换 */
+    const i = st.order.indexOf(c.uid);
+    const pip = R.panelPips && R.panelPips[i];
+    if (pip) {
+      pip.style.setProperty('--pc', ELEMENTS[c.element].color);
+      pip.title = ELEMENTS[c.element].name + ' · ' + c.name;
+    }
+    updatePanel(c, st);
   }
 
   /* ---------------- 卡牌区 ---------------- */
@@ -376,10 +401,14 @@ const UI = (function () {
       })
       .join('');
 
+    const kills = st.kills || 0;
+    const reward = st.reward || 0;
     E.overlay.innerHTML =
       '<div class="overlay-box">' +
-        '<div class="ov-title ' + (win ? 'win' : 'lose') + '">' + (win ? '胜  利' : '败  北') + '</div>' +
-        '<div class="ov-sub">' + (win ? '敌方全员被击败' : '我方全员被击败') + '　·　共经过 ' + st.round + ' 回合</div>' +
+        '<div class="ov-title ' + (win ? 'win' : 'lose') + '">战  果</div>' +
+        '<div class="ov-kills">击杀 <b>' + kills + '</b> 个敌人</div>' +
+        '<div class="ov-reward">获得 <b>' + fmtNum(reward) + '</b> 金币</div>' +
+        '<div class="ov-sub">共经过 ' + st.round + ' 回合</div>' +
         '<div class="ov-list">' + rows + '</div>' +
         '<button type="button" class="px-btn big" id="ovRestart">再 战 一 次</button>' +
       '</div>';
@@ -400,7 +429,7 @@ const UI = (function () {
   }
 
   return {
-    build, refresh, renderCards, setHint,
+    build, refresh, rebuildChar, renderCards, setHint,
     showTargets, clearTargets,
     log, floatText, shake, lunge, cast,
     gameOver, clearOverlay,

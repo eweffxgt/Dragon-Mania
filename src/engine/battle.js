@@ -99,6 +99,8 @@ const Battle = (function () {
       /* 控制类（封印 / 麻痹）不刷新持续时间，避免被无限控住 */
       if (def.id === 'seal' || def.id === 'paralyze') return null;
       s.turns = Math.max(s.turns, def.turns);
+      /* 谁最后施加的，倒计时就跟谁走 */
+      if (def.casterUid) s.casterUid = def.casterUid;
       if (def.id === 'guard' || def.id === 'retaliate') {
         /* 减伤 / 反伤光环：额度不叠加，取更高的一档 */
         s.value = Math.max(s.value || 0, def.value || 0);
@@ -127,9 +129,13 @@ const Battle = (function () {
     return s;
   }
 
-  function tickStatuses(char) {
+  /* 状态倒计时。
+   * filter 为空 = 全部状态 -1；传函数 = 只结算匹配的状态。
+   * 到期时要把 maxhp_up 加的上限扣回去。 */
+  function tickStatuses(char, filter) {
     const removed = [];
     char.statuses.forEach((s) => {
+      if (filter && !filter(s)) return;
       s.turns -= 1;
       if (s.turns <= 0) removed.push(s);
     });
@@ -140,6 +146,32 @@ const Battle = (function () {
         char.hp = Math.min(char.hp, char.maxHp);
       }
     });
+    return removed.length;
+  }
+
+  /* 施法者回合开始：把它施加的所有状态推进一回合
+   * 这样「2 回合」= 施法者从这次行动到下次行动，和站位无关 */
+  function tickCasterStatuses(st, caster) {
+    if (!caster) return;
+    let n = 0;
+    st.chars.forEach((c) => {
+      if (!c.alive) return;
+      n += tickStatuses(c, (s) => s.casterUid === caster.uid);
+    });
+    if (n) UI.refresh(st);
+  }
+
+  /* 兜底：施法者已阵亡 / 找不到时，这类状态改在回合边界统一 -1 */
+  function tickOrphanStatuses(st) {
+    let n = 0;
+    st.chars.forEach((c) => {
+      if (!c.alive) return;
+      n += tickStatuses(c, (s) => {
+        const o = s.casterUid ? st.byUid[s.casterUid] : null;
+        return !o || !o.alive;
+      });
+    });
+    if (n) UI.refresh(st);
   }
 
   function mods(c) {
@@ -584,6 +616,9 @@ const Battle = (function () {
     await sleep(280);
     if (st.token !== token) return;
 
+    /* 施法者回合开始：把自己施加的状态推进一回合（buff 倒计时） */
+    tickCasterStatuses(st, actor);
+
     /* 封印 */
     if (statusOf(actor, 'seal')) {
       UI.floatText(actor.uid, '封印!', 'status');
@@ -662,8 +697,8 @@ const Battle = (function () {
       if (regen) await heal(st, c, regen.value, '回春');
     }
 
-    /* 3) 全场状态倒计时 -1 */
-    chars.forEach((c) => { if (c.alive) tickStatuses(c); });
+    /* 3) 兜底：施法者已阵亡的状态在回合边界推进 */
+    tickOrphanStatuses(st);
     UI.refresh(st);
     await sleep(140);
   }

@@ -24,7 +24,7 @@
  * ========================================================= */
 const PlayerState = (function () {
   var SAVE_VERSION = 3;
-  var DEFAULT_GOLD = 10000000;   /* 初始金币 1000 万 */
+  var DEFAULT_GOLD = 1000000;    /* 初始金币 100 万（只对第一次玩的新档生效） */
   var DEFAULT_FRUIT = 100000;    /* 初始果实 10 万 */
   var DEFAULT_LEVEL = 10;        /* 所有角色初始等级 */
   var MAX_STARS = 5;

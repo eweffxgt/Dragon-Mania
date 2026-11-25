@@ -188,11 +188,61 @@
     battleStarted = true;
   }
 
+  /* =========================================================
+   * 彩蛋：左龙头 1 次 → 右龙头 1 次 → 左龙头 2 次，
+   * 弹出「是否重置存档？」。没有音效也没有额外视觉反馈。
+   * ========================================================= */
+  let dragonSeq = [];
+  let dragonTimer = 0;
+
+  function dragonTap(which) {
+    if (dragonTimer) clearTimeout(dragonTimer);
+    dragonSeq.push(which);
+    if (dragonSeq.length > 4) dragonSeq.shift();
+    dragonTimer = setTimeout(function () { dragonSeq = []; dragonTimer = 0; }, 2500);
+
+    if (dragonSeq.join('') === 'LRLL') {
+      dragonSeq = [];
+      clearTimeout(dragonTimer);
+      dragonTimer = 0;
+      openResetConfirm();
+    }
+  }
+
+  function openResetConfirm() {
+    const d = el('resetConfirm');
+    if (d) d.classList.remove('hidden');
+  }
+
+  function closeResetConfirm() {
+    const d = el('resetConfirm');
+    if (d) d.classList.add('hidden');
+  }
+
+  function doResetSave() {
+    closeResetConfirm();
+    if (typeof PlayerState !== 'undefined') {
+      PlayerState.reset();          /* 清空角色 + 星光 + 金币果实回默认，并落盘 */
+      if (typeof UI !== 'undefined' && UI.refresh) UI.refresh();
+    }
+    showMenu();
+  }
+
   function bindMenu() {
     const fight = el('menuFight');
     const manage = el('menuManage');
     const guide = el('menuGuide');
     const back = el('subBack');
+
+    const dl = el('menuDragonL');
+    const dr = el('menuDragonR');
+    if (dl) dl.addEventListener('click', function () { dragonTap('L'); });
+    if (dr) dr.addEventListener('click', function () { dragonTap('R'); });
+
+    const yes = el('resetYes');
+    const no = el('resetNo');
+    if (yes) yes.addEventListener('click', doResetSave);
+    if (no) no.addEventListener('click', closeResetConfirm);
 
     if (fight) {
       fight.addEventListener('click', function () {

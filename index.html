@@ -70,6 +70,17 @@
     <!-- 整张「游戏主界面」直接当底图，三个透明按钮压在对应位置 -->
     <section class="screen menu-screen" id="menuScreen">
       <img class="menu-bg" src="./assets/menu.png" alt="龙之城 主界面">
+      <button type="button" class="menu-dragon left" id="menuDragonL" tabindex="-1" aria-hidden="true"></button>
+      <button type="button" class="menu-dragon right" id="menuDragonR" tabindex="-1" aria-hidden="true"></button>
+      <div class="px-confirm hidden" id="resetConfirm">
+        <div class="px-confirm-box">
+          <div class="px-confirm-title">是否重置存档？</div>
+          <div class="px-confirm-btns">
+            <button type="button" class="px-btn big" id="resetYes">是</button>
+            <button type="button" class="px-btn big" id="resetNo">否</button>
+          </div>
+        </div>
+      </div>
       <button type="button" class="menu-hit" id="menuFight" aria-label="战斗"></button>
       <button type="button" class="menu-hit" id="menuManage" aria-label="管理"></button>
       <button type="button" class="menu-hit" id="menuGuide" aria-label="图鉴"></button>
@@ -134,10 +145,10 @@
       <button type="button" class="px-btn star-back" id="stBack">返回</button>
 
       <!-- 升星确认弹窗 -->
-      <div class="st-confirm hidden" id="stConfirm">
-        <div class="st-confirm-box">
-          <div class="st-confirm-title" id="stConfirmTitle">当前升星消耗 ? 水晶，是否继续</div>
-          <div class="st-confirm-btns">
+      <div class="px-confirm hidden" id="stConfirm">
+        <div class="px-confirm-box">
+          <div class="px-confirm-title" id="stConfirmTitle">当前升星消耗 ? 水晶，是否继续</div>
+          <div class="px-confirm-btns">
             <button type="button" class="px-btn big" id="stYes">是</button>
             <button type="button" class="px-btn big" id="stNo">否</button>
           </div>

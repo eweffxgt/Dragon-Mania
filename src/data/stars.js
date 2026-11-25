@@ -2,7 +2,7 @@
  * 升星数据
  *
  * 星级 0~16 共 17 种状态，展示成 4 个星位：
- *   1-4 星    全黄星
+ *   1-4 星    全黄星（从左往右依次点亮）
  *   5-8 星    逐颗把黄星换成粉星
  *   9-12 星   逐颗把粉星换成暗红星
  *   13-16 星  逐颗把暗红星换成彩星
@@ -41,7 +41,8 @@ const STAR = (function () {
     var idx = (level - 1) % 4;                /* 0..3 */
     var cur = Math.min(4, tier + 1);
     var prev = tier;
-    for (var i = 0; i < 4; i++) out[i] = i >= (3 - idx) ? cur : prev;
+    /* 从左往右填：前 idx+1 个是本段颜色，其余是上一段的颜色 */
+    for (var i = 0; i < 4; i++) out[i] = i <= idx ? cur : prev;
     return out;
   }
 

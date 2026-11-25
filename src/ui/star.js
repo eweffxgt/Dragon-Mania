@@ -20,9 +20,10 @@ const StarUp = (function () {
     { x: 220, y: 345, label: '技能', key: 'skill' }
   ];
 
-  /* 4 个星位：中心 x 依次 375 / 447 / 518.5 / 590.5，y 55..91 */
-  var SLOT_Y = 55, SLOT_W = 41, SLOT_H = 37;
-  var SLOT_X = [375, 447, 518.5, 590.5];
+  /* 4 个星位：底图里星形洞口的实测外框（源 360×330，间距 510），
+   * 换算到设计坐标 50.65×46.2；星贴图与洞口是同一张图，1:1 覆盖即可严丝合缝。 */
+  var SLOT_W = 50.65, SLOT_H = 46.2, SLOT_Y = 50.4;
+  var SLOT_X = [350.35, 422.11, 493.87, 565.63];
 
   var USE = { x: 680, y: 55, w: 105, h: 37 };
 
@@ -120,7 +121,7 @@ const StarUp = (function () {
     var slots = STAR.slots(stars);
     for (var k = 0; k < 4; k++) {
       var kind = slots[k];
-      var x = SLOT_X[k] - SLOT_W / 2;
+      var x = SLOT_X[k];
       if (kind > 0) {
         html += '<img class="st-star" src="' + STAR.SPRITE[kind - 1] + '" alt=""' +
                 ' style="left:' + x + 'px;top:' + SLOT_Y + 'px;width:' + SLOT_W +

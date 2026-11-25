@@ -1,0 +1,23 @@
+# 构建产物
+dist/
+*.zip
+
+# 推广素材（原始截图 / 视频工作目录）
+推广/
+
+# 本地工具与临时产物
+.skill/
+tools/frames/
+tools/vid/
+tools/ffmpeg/
+tools/ffmpeg*
+tools/*.png
+tools/*.log
+tools/*.pem
+tools/*.cer
+tools/*.txt
+
+# 系统垃圾
+.DS_Store
+Thumbs.db
+desktop.ini

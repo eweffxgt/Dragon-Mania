@@ -146,6 +146,10 @@
       LevelUp.open(char);
       return;
     }
+    if (act === 'star') {
+      StarUp.open(char);
+      return;
+    }
     showGrowth(label, char);
   }
 
@@ -174,6 +178,8 @@
     if (ms) ms.classList.add('hidden');
     const ls = el('levelScreen');
     if (ls) ls.classList.add('hidden');
+    const sts = el('starScreen');
+    if (sts) sts.classList.add('hidden');
     const ss = el('selectScreen');
     if (ss) ss.classList.add('hidden');
     removeBoot();
@@ -256,7 +262,11 @@
     Select.onConfirm = function (team) { startBattle(team); };
     Select.onClose = showMenu;
     LevelUp.bind();
-    LevelUp.onGrowth = function (act, label, char) { showGrowth(label, char); };
+    LevelUp.onGrowth = function (act, label, char) { openGrowth(act, label, char); };
+
+    StarUp.bind();
+    StarUp.onGrowth = function (act, label, char) { openGrowth(act, label, char); };
+    StarUp.onClose = function () { Manage.open(); };
     LevelUp.onClose = function () { Manage.open(); };
     Manage.setOnOpen(openGrowth);
 
@@ -279,6 +289,15 @@
       LevelUp.open(GUIDE_DEX[Number(params.get('idx')) || 0],
         lvP == null ? null : Number(lvP),
         fdP == null ? null : Number(fdP));
+    } else if (screen === 'star') {
+      var stP = params.get('stars'), crP = params.get('crystal');
+      if (crP != null) {
+        var ch0 = GUIDE_DEX[Number(params.get('idx')) || 0];
+        var ele0 = (ch0.elements || [])[0] || 'ancient';
+        PlayerState.addCrystal(ele0, Number(crP) || 0);
+      }
+      StarUp.open(GUIDE_DEX[Number(params.get('idx')) || 0],
+        stP == null ? null : Number(stP));
     } else if (screen === 'growth') {
       Manage.open(Number(params.get('page')) || 0);
       showGrowth(params.get('label') || '升 级', null);

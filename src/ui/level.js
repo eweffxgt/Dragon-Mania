@@ -235,6 +235,10 @@ const LevelUp = (function () {
     var st0 = stateOf(current);
     if (debugLevel != null && !isNaN(debugLevel)) st0.level = Math.max(1, Math.floor(debugLevel));
     if (debugFeed != null && !isNaN(debugFeed)) st0.feed = Math.max(0, Math.min(2, Math.floor(debugFeed)));
+    ['starScreen', 'manageScreen', 'guideScreen', 'subScreen', 'menuScreen'].forEach(function (id) {
+      var n = el(id);
+      if (n) n.classList.add('hidden');
+    });
     var s = el('levelScreen');
     if (s) s.classList.remove('hidden');
     render();

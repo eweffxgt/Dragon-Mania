@@ -23,7 +23,7 @@
  *      同时给 hydrate 的默认值，缺字段的老档才能平滑升级
  * ========================================================= */
 const PlayerState = (function () {
-  var SAVE_VERSION = 2;
+  var SAVE_VERSION = 3;
   var DEFAULT_GOLD = 10000000;   /* 初始金币 1000 万 */
   var DEFAULT_FRUIT = 100000;    /* 初始果实 10 万 */
   var DEFAULT_LEVEL = 10;        /* 所有角色初始等级 */
@@ -32,6 +32,7 @@ const PlayerState = (function () {
 
   var entries = {};              /* name -> { level, feed, stars, runes, skills } */
   var wallet = { gold: DEFAULT_GOLD, fruit: DEFAULT_FRUIT };
+  var crystals = {};             /* 元素 id -> 水晶数量 */
   var savedAt = 0;
 
   function clampLevel(v) {
@@ -100,6 +101,32 @@ const PlayerState = (function () {
     return e;
   }
 
+  /* ---------- 水晶（升星材料，按元素分） ---------- */
+  function crystalOf(element) {
+    if (!element) return 0;
+    return crystals[element] || 0;
+  }
+
+  function addCrystal(element, n) {
+    if (!element || !n) return 0;
+    crystals[element] = Math.max(0, (crystals[element] || 0) + Math.floor(n));
+    return crystals[element];
+  }
+
+  function spendCrystal(element, n) {
+    if (!element || !n) return false;
+    var have = crystals[element] || 0;
+    if (have < n) return false;
+    crystals[element] = have - n;
+    return true;
+  }
+
+  function crystalMap() {
+    var out = {};
+    Object.keys(crystals).forEach(function (k) { out[k] = crystals[k]; });
+    return out;
+  }
+
   function levelOf(name, fallback) {
     var e = entries[name];
     return e ? e.level : clampLevel(fallback == null ? DEFAULT_LEVEL : fallback);
@@ -122,6 +149,7 @@ const PlayerState = (function () {
       v: SAVE_VERSION,
       ts: Date.now(),
       chars: chars,
+      crystals: crystalMap(),
       wallet: { gold: wallet.gold, fruit: wallet.fruit }
     };
   }
@@ -144,8 +172,14 @@ const PlayerState = (function () {
       v = 2;
     }
 
+    if (v < 3) {
+      /* v2 -> v3：加水晶（升星材料） */
+      if (!data.crystals || typeof data.crystals !== 'object') data.crystals = {};
+      v = 3;
+    }
+
     /* 留给下个版本：
-     * if (v < 3) { ...; v = 3; }
+     * if (v < 4) { ...; v = 4; }
      */
 
     data.v = v;
@@ -172,6 +206,13 @@ const PlayerState = (function () {
         wallet.fruit = Math.max(0, Math.round(data.wallet.fruit));
         changed = true;
       }
+    }
+    if (data.crystals && typeof data.crystals === 'object') {
+      Object.keys(data.crystals).forEach(function (k) {
+        var n = Math.floor(Number(data.crystals[k]) || 0);
+        crystals[k] = n > 0 ? n : 0;
+        changed = true;
+      });
     }
     if (typeof data.ts === 'number') savedAt = data.ts;
     return changed;
@@ -201,6 +242,7 @@ const PlayerState = (function () {
 
   function reset(keepWallet) {
     entries = {};
+    crystals = {};
     if (!keepWallet) {
       wallet.gold = DEFAULT_GOLD;
       wallet.fruit = DEFAULT_FRUIT;
@@ -211,6 +253,11 @@ const PlayerState = (function () {
   return {
     entry: entry,
     levelOf: levelOf,
+    crystalOf: crystalOf,
+    addCrystal: addCrystal,
+    spendCrystal: spendCrystal,
+    crystalMap: crystalMap,
+    crystals: crystals,
     snapshot: snapshot,
     hydrate: hydrate,
     migrate: migrate,

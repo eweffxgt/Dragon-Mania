@@ -856,6 +856,11 @@ const Battle = (function () {
     const cs = (typeof curveStats === 'function')
       ? curveStats(lv, base && base.hp100, base && base.atk100)
       : null;
+    /* 升星倍率：只作用于我方角色（攻击和生命上限同乘） */
+    const stars = (side === 'ally' && typeof PlayerState !== 'undefined')
+      ? (PlayerState.entry(tpl.name, tpl.level).stars || 0)
+      : 0;
+    const starK = (typeof starMult === 'function') ? starMult(stars) : 1;
     return {
       uid: (side === 'ally' ? 'p' : 'e') + slot,
       side,
@@ -867,9 +872,10 @@ const Battle = (function () {
       element: elements[0],     // 主元素 = 属性，决定被什么克制
       avatarUrl: tpl.avatarUrl || '',
       /* 每局重建角色，对手龙固定 100% 生命开局，不继承上一局的损耗 */
-      maxHp: cs ? cs.hp : tpl.hp,
-      hp: cs ? cs.hp : tpl.hp,
-      atk: cs ? cs.atk : tpl.atk,
+      stars: stars,
+      maxHp: cs ? Math.round(cs.hp * starK) : tpl.hp,
+      hp: cs ? Math.round(cs.hp * starK) : tpl.hp,
+      atk: cs ? Math.round(cs.atk * starK) : tpl.atk,
       crit: tpl.crit == null ? 10 : tpl.crit,
       skills: skillsOfElements(elements),
       statuses: [],

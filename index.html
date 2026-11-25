@@ -125,6 +125,26 @@
       <button type="button" class="px-btn level-back" id="lvBack">返回</button>
     </section>
 
+    <!-- ================= 升星 ================= -->
+    <!-- 左：角色窗口（同升级界面）  右上：星级 + USE  右中：金币/水晶  右下：水晶商店 -->
+    <section class="screen star-screen hidden" id="starScreen">
+      <img class="star-bg" src="./assets/star.png" alt="升星">
+      <div class="star-grid" id="stGrid"></div>
+      <div class="lv-tip" id="stTip"></div>
+      <button type="button" class="px-btn star-back" id="stBack">返回</button>
+
+      <!-- 升星确认弹窗 -->
+      <div class="st-confirm hidden" id="stConfirm">
+        <div class="st-confirm-box">
+          <div class="st-confirm-title" id="stConfirmTitle">当前升星消耗 ? 水晶，是否继续</div>
+          <div class="st-confirm-btns">
+            <button type="button" class="px-btn big" id="stYes">是</button>
+            <button type="button" class="px-btn big" id="stNo">否</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- ================= 图鉴 ================= -->
     <!-- 整张「图鉴界面」当底图，16 个窗口 + 左右翻页箭头压在上面 -->
     <section class="screen guide-screen hidden" id="guideScreen">
@@ -151,6 +171,7 @@
 <script defer src="./src/data/statuses.js"></script>
 <script defer src="./src/data/skills.js"></script>
 <script defer src="./src/data/stats.js"></script>
+<script defer src="./src/data/stars.js"></script>
 <script defer src="./src/data/curve.js"></script>
 <script defer src="./src/platform/storage.js"></script>
 <script defer src="./src/data/state.js"></script>
@@ -163,6 +184,7 @@
 <script defer src="./src/ui/manage.js"></script>
 <script defer src="./src/ui/select.js"></script>
 <script defer src="./src/ui/level.js"></script>
+<script defer src="./src/ui/star.js"></script>
 <script defer src="./src/engine/battle.js"></script>
 <script defer src="./src/main.js"></script>
 <!-- 网页版强制全屏增强：小工具版本（dist/index.html）不加载这一行 -->

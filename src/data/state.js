@@ -1,21 +1,38 @@
 /* =========================================================
- * 玩家状态（带存档）
+ * 玩家状态（带存档 + 版本迁移）
  *
- * 存的东西：
- *   - 每个角色的等级和喂养档位（0 / 1 / 2）
- *   - 金币、果实
+ * 存档结构（v2）：
+ *   {
+ *     v: 2,
+ *     ts: 1732531200000,              // 最后保存时间，多端合并时用
+ *     wallet: { gold, fruit },
+ *     chars: {
+ *       "酷斯龙": {
+ *         level: 27, feed: 1,         // 等级 / 喂养档位 0-2
+ *         stars: 0,                   // 升星
+ *         runes: [],                  // 魔符（id 字符串数组）
+ *         skills: {}                  // 技能等级 { "holy": 3 }
+ *       }
+ *     }
+ *   }
  *
- * 读写都过 SaveStorage（小工具 Storage / localStorage / 内存三选一），
- * 任何一次改动后调用 PlayerState.save() 落盘。
+ * 三条规则，改存档前必须守住：
+ *   1. **不要改 SaveStorage.KEY**（key 里的 v1 是历史命名，真版本看 data.v）
+ *   2. **不要改角色名字** —— 存档按名字索引，改名 = 丢该角色进度
+ *   3. 加字段时：SAVE_VERSION +1，并在 migrate() 里补一条补丁，
+ *      同时给 hydrate 的默认值，缺字段的老档才能平滑升级
  * ========================================================= */
 const PlayerState = (function () {
-  var SAVE_VERSION = 1;
+  var SAVE_VERSION = 2;
   var DEFAULT_GOLD = 10000000;   /* 初始金币 1000 万 */
   var DEFAULT_FRUIT = 100000;    /* 初始果实 10 万 */
   var DEFAULT_LEVEL = 10;        /* 所有角色初始等级 */
+  var MAX_STARS = 5;
+  var MAX_RUNES = 6;
 
-  var entries = {};              /* name -> { level, feed } */
+  var entries = {};              /* name -> { level, feed, stars, runes, skills } */
   var wallet = { gold: DEFAULT_GOLD, fruit: DEFAULT_FRUIT };
+  var savedAt = 0;
 
   function clampLevel(v) {
     var n = Math.floor(Number(v) || 0);
@@ -29,12 +46,55 @@ const PlayerState = (function () {
     return n < 0 ? 0 : (n > 2 ? 2 : n);
   }
 
+  function clampStars(v) {
+    var n = Math.floor(Number(v) || 0);
+    return n < 0 ? 0 : (n > MAX_STARS ? MAX_STARS : n);
+  }
+
+  function clampRunes(list) {
+    if (!Array.isArray(list)) return [];
+    return list.filter(function (x) { return typeof x === 'string' && x; }).slice(0, MAX_RUNES);
+  }
+
+  function clampSkills(obj) {
+    var out = {};
+    if (!obj || typeof obj !== 'object') return out;
+    Object.keys(obj).forEach(function (k) {
+      var v = Math.floor(Number(obj[k]) || 0);
+      if (v > 0) out[k] = v > 99 ? 99 : v;
+    });
+    return out;
+  }
+
+  /* 一条角色记录的标准形状（新档 / 老档补字段都用它） */
+  function blankChar(baseLevel) {
+    return {
+      level: clampLevel(baseLevel == null ? DEFAULT_LEVEL : baseLevel),
+      feed: 0,
+      stars: 0,
+      runes: [],
+      skills: {}
+    };
+  }
+
+  /* 把任意来源的记录规整成标准形状（缺字段给默认值，坏数据被夹紧） */
+  function normalizeChar(src, baseLevel) {
+    var rec = blankChar(baseLevel);
+    if (!src || typeof src !== 'object') return rec;
+    rec.level = clampLevel(src.level == null ? rec.level : src.level);
+    rec.feed = clampFeed(src.feed);
+    rec.stars = clampStars(src.stars);
+    rec.runes = clampRunes(src.runes);
+    rec.skills = clampSkills(src.skills);
+    return rec;
+  }
+
   /* 取（必要时创建）某个角色的状态，返回的是活对象，可直接改 */
   function entry(name, baseLevel) {
-    if (!name) return { level: DEFAULT_LEVEL, feed: 0 };
+    if (!name) return blankChar(baseLevel);
     var e = entries[name];
     if (!e) {
-      e = { level: clampLevel(baseLevel == null ? DEFAULT_LEVEL : baseLevel), feed: 0 };
+      e = blankChar(baseLevel);
       entries[name] = e;
     }
     return e;
@@ -49,24 +109,57 @@ const PlayerState = (function () {
   function snapshot() {
     var chars = {};
     Object.keys(entries).forEach(function (k) {
-      chars[k] = { level: entries[k].level, feed: entries[k].feed };
+      var e = entries[k];
+      chars[k] = {
+        level: e.level,
+        feed: e.feed,
+        stars: e.stars,
+        runes: e.runes.slice(),
+        skills: Object.assign({}, e.skills)
+      };
     });
     return {
       v: SAVE_VERSION,
+      ts: Date.now(),
       chars: chars,
       wallet: { gold: wallet.gold, fruit: wallet.fruit }
     };
   }
 
-  function hydrate(data) {
-    if (!data || typeof data !== 'object') return false;
+  /* 老档升级：每个版本加一段，逐级往后推 */
+  function migrate(data) {
+    if (!data || typeof data !== 'object') return null;
+    var v = Math.floor(Number(data.v) || 1);
+
+    if (v < 2) {
+      /* v1 -> v2：补上升星 / 魔符 / 技能三个字段 */
+      data.chars = data.chars || {};
+      Object.keys(data.chars).forEach(function (k) {
+        var c = data.chars[k] || {};
+        if (c.stars == null) c.stars = 0;
+        if (!Array.isArray(c.runes)) c.runes = [];
+        if (!c.skills || typeof c.skills !== 'object') c.skills = {};
+        data.chars[k] = c;
+      });
+      v = 2;
+    }
+
+    /* 留给下个版本：
+     * if (v < 3) { ...; v = 3; }
+     */
+
+    data.v = v;
+    return data;
+  }
+
+  function hydrate(raw) {
+    var data = migrate(raw);
+    if (!data) return false;
     var changed = false;
 
     if (data.chars && typeof data.chars === 'object') {
       Object.keys(data.chars).forEach(function (k) {
-        var s = data.chars[k];
-        if (!s) return;
-        entries[k] = { level: clampLevel(s.level), feed: clampFeed(s.feed) };
+        entries[k] = normalizeChar(data.chars[k]);
         changed = true;
       });
     }
@@ -80,11 +173,13 @@ const PlayerState = (function () {
         changed = true;
       }
     }
+    if (typeof data.ts === 'number') savedAt = data.ts;
     return changed;
   }
 
   function save() {
     if (typeof SaveStorage === 'undefined') return false;
+    savedAt = Date.now();
     return SaveStorage.write(snapshot());
   }
 
@@ -118,12 +213,17 @@ const PlayerState = (function () {
     levelOf: levelOf,
     snapshot: snapshot,
     hydrate: hydrate,
+    migrate: migrate,
     save: save,
     load: load,
     reset: reset,
     wallet: wallet,
+    savedAt: function () { return savedAt; },
     DEFAULT_LEVEL: DEFAULT_LEVEL,
     DEFAULT_GOLD: DEFAULT_GOLD,
-    DEFAULT_FRUIT: DEFAULT_FRUIT
+    DEFAULT_FRUIT: DEFAULT_FRUIT,
+    MAX_STARS: MAX_STARS,
+    MAX_RUNES: MAX_RUNES,
+    SAVE_VERSION: SAVE_VERSION
   };
 })();

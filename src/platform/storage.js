@@ -30,14 +30,26 @@ const SaveStorage = (function () {
     return (m && typeof m.setStorage === 'function' && typeof m.getStorage === 'function') ? m : null;
   }
 
+  /* 坏档备份：解析失败时先把原始字符串留一份，再当没有存档 */
+  function backup(raw) {
+    var store = ls();
+    if (!store || !raw) return;
+    try { store.setItem(KEY + '-broken', raw); } catch (e) { /* 存不下就算了 */ }
+  }
+
   /* 同步读：localStorage → 内存 */
   function read() {
     var store = ls();
     if (store) {
-      try {
-        var raw = store.getItem(KEY);
-        if (raw) return JSON.parse(raw);
-      } catch (e) { /* 坏档当没有 */ }
+      var raw = null;
+      try { raw = store.getItem(KEY); } catch (e) { raw = null; }
+      if (raw) {
+        try {
+          return JSON.parse(raw);
+        } catch (e) {
+          backup(raw);           /* 存档损坏：备份后当作新档，避免用户直接归零还找不回 */
+        }
+      }
     }
     return memory;
   }

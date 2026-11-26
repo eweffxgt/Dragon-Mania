@@ -27,7 +27,7 @@ const PlayerState = (function () {
   var DEFAULT_GOLD = 1000000;    /* 初始金币 100 万（只对第一次玩的新档生效） */
   var DEFAULT_FRUIT = 100000;    /* 初始果实 10 万 */
   var DEFAULT_LEVEL = 10;        /* 所有角色初始等级 */
-  var MAX_STARS = 5;
+  var MAX_STARS = (typeof STAR !== 'undefined' && STAR.MAX) ? STAR.MAX : 16;   /* 升星上限以 stars.js 为准 */
   var MAX_RUNES = 6;
 
   var entries = {};              /* name -> { level, feed, stars, runes, skills } */

@@ -1,0 +1,65 @@
+火系：Level 1	Deals 100% DAS damage to the primary target, and an additional 35% DAS damage to all other opponents.
+Level 2	Deals 100% DAS damage to the primary target, and an additional 45% DAS damage to all other opponents.
+Level 3	Deals 100% DAS damage to the primary target, and an additional 55% DAS damage to all other opponents.
+Level 4	Deals 100% DAS damage to the primary target, and an additional 65% DAS damage to all other opponents.
+Level 5	Deals 100% DAS damage to the primary target, and an additional 75% DAS damage to all other opponents.
+风系：Level 1	Reduces target's damage by 40% DAS over 2 turns.
+Level 2	Reduces target's damage by 50% DAS over 2 turns.
+Level 3	Reduces target's damage by 60% DAS over 2 turns.
+Level 4	Reduces target's damage by 70% DAS over 2 turns.
+Level 5	Reduces target's damage by 80% DAS over 2 turns.
+大地系：Level 1	Absorbs 95% DAS incoming direct and 30% DAS indirect damage for the allied target, and 50% DAS direct damage for other allies over 2 turns.
+Level 2	Absorbs 100% DAS incoming direct and 30% DAS indirect damage for the allied target, and 50% DAS direct damage for other allies over 2 turns.
+Level 3	Absorbs 105% DAS incoming direct and 30% DAS indirect damage for the allied target, and 60% DAS direct damage for other allies over 2 turns.
+Level 4	Absorbs 110% DAS incoming direct and 30% DAS indirect damage for the allied target, and 60% DAS direct damage for other allies over 2 turns.
+Level 5	Absorbs 115% DAS incoming direct and 30% DAS indirect damage for the allied target, and 70% DAS direct damage for other allies over 2 turns.
+水系：Level 1	Heals allied target for 100% DAS HP and all other allies for 40% DAS HP.
+Level 2	Heals allied target for 110% DAS HP and all other allies for 40% DAS HP.
+Level 3	Heals allied target for 120% DAS HP and all other allies for 45% DAS HP.
+Level 4	Heals allied target for 130% DAS HP and all other allies for 45% DAS HP.
+Level 5	Heals allied target for 140% DAS HP and all other allies for 50% DAS HP.
+草系：Level 1	Deals 30% DAS as damage over 2 turns.
+Level 2	Deals 40% DAS as damage over 2 turns.
+Level 3	Deals 50% DAS as damage over 2 turns.
+Level 4	Deals 60% DAS as damage over 2 turns.
+Level 5	Deals 70% DAS as damage over 2 turns.
+钢系：Level 1	Target ally's primary aura deals 75% DAS retaliation to the direct attacker, allied secondary aura deals 25% DAS retaliation to the direct attacker, and both auras deal 30% DAS to indirect attacks for 2 turns.
+Level 2	Target ally's primary aura deals 85% DAS retaliation to the direct attacker, allied secondary aura deals 30% DAS retaliation to the direct attacker, and both auras deal 30% DAS to indirect attacks for 2 turns.
+Level 3	Target ally's primary aura deals 95% DAS retaliation to the direct attacker, allied secondary aura deals 35% DAS retaliation to the direct attacker, and both auras deal 30% DAS to indirect attacks for 2 turns.
+Level 4	Target ally's primary aura deals 105% DAS retaliation to the direct attacker, allied secondary aura deals 40% DAS retaliation to the direct attacker, and both auras deal 30% DAS to indirect attacks for 2 turns.
+Level 5	Target ally's primary aura deals 115% DAS retaliation to the direct attacker, allied secondary aura deals 45% DAS retaliation to the direct attacker, and both auras deal 30% DAS to indirect attacks for 2 turns.
+电系：Level 1	Deals an additional 40% DAS damage to another opponent, plus a 20% chance to deal an additional 30% DAS to a third opponent.
+Level 2	Deals an additional 50% DAS damage to another opponent, plus a 25% chance to deal an additional 40% DAS to a third opponent.
+Level 3	Deals an additional 60% DAS damage to another opponent, plus a 30% chance to deal an additional 50% DAS to a third opponent.
+Level 4	Deals an additional 70% DAS damage to another opponent, plus a 35% chance to deal an additional 60% DAS to a third opponent.
+Level 5	Deals an additional 80% DAS damage to another opponent, plus a 40% chance to deal an additional 70% DAS to a third opponent.
+虚空系：Level 1	Heals the caster by 35% of the caster's DAS HP (not exceeding the target's current health).
+Level 2	Heals the caster by 45% of the caster's DAS HP (not exceeding the target's current health).
+Level 3	Heals the caster by 55% of the caster's DAS HP (not exceeding the target's current health).
+Level 4	Heals the caster by 65% of the caster's DAS HP (not exceeding the target's current health).
+Level 5	Heals the caster by 75% of the caster's DAS HP (not exceeding the target's current health).
+光系：Level 1	Deals 100% DAS damage to the primary target, and 35% damage to all other opponents.
+Level 2	Deals 100% DAS damage to the primary target, and 45% damage to all other opponents.
+Level 3	Deals 100% DAS damage to the primary target, and 55% damage to all other opponents.
+Level 4	Deals 100% DAS damage to the primary target, and 65% damage to all other opponents.
+Level 5	Deals 100% DAS damage to the primary target, and 75% damage to all other opponents.
+暗系：Level 1	Deals 30% DAS as damage over 2 turns.
+Level 2	Deals 40% DAS as damage over 2 turns.
+Level 3	Deals 50% DAS as damage over 2 turns.
+Level 4	Deals 60% DAS as damage over 2 turns.
+Level 5	Deals 70% DAS as damage over 2 turns.
+神圣系：Level 1	An ally deals 20% DAS more damage and has 35% more of its original HP for 2 turns.
+Level 2	An ally deals 30% DAS more damage and has 40% more of its original HP for 2 turns.
+Level 3	An ally deals 40% DAS more damage and has 45% more of its original HP for 2 turns.
+Level 4	An ally deals 50% DAS more damage and has 50% more of its original HP for 2 turns.
+Level 5	An ally deals 55% DAS more damage and has 60% more of its original HP for 2 turns.
+古代系：Level 1	Reduces the target's base damage, and deals more damage, by 5% DAS over 2 turns.
+Level 2	Reduces the target's base damage, and deals more damage, by 15% DAS over 2 turns.
+Level 3	Reduces the target's base damage, and deals more damage, by 25% DAS over 2 turns.
+Level 4	Reduces the target's base damage, and deals more damage, by 35% DAS over 2 turns.
+Level 5	Reduces the target's base damage, and deals more damage, by 45% DAS over 2 turns.
+霸主系：Level 1	Shields an allied target with 40% DAS additional HP (acting like a shield), and taunts opponents to attack it for 2 turns.
+Level 2	Shields an allied target with 45% DAS additional HP (acting like a shield), and taunts opponents to attack it for 2 turns.
+Level 3	Shields an allied target with 50% DAS additional HP (acting like a shield), and taunts opponents to attack it for 2 turns.
+Level 4	Shields an allied target with 60% DAS additional HP (acting like a shield), and taunts opponents to attack it for 2 turns.
+Level 5	Shields an allied target with 70% DAS additional HP (acting like a shield), and taunts opponents to attack it for 2 turns.

@@ -1537,3 +1537,132 @@ button { font-family: inherit; }
   height: 201px;
 }
 .menu-dragon:focus { outline: none; }
+
+/* =========================================================
+ * 技能界面
+ * ========================================================= */
+.skill-screen { background: #f0a020; }
+.skill-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 840px;
+  height: 420px;
+  display: block;
+}
+.skill-grid {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 840px;
+  height: 420px;
+}
+
+/* 右上说明区（深红底） */
+.sk-desc {
+  position: absolute;
+  z-index: 3;
+  color: var(--cream);
+  font-size: 10px;
+  line-height: 16px;
+  letter-spacing: 0.3px;
+  overflow: hidden;
+}
+.sk-desc .sk-none {
+  text-align: center;
+  font-size: 13px;
+  line-height: 90px;
+  color: rgba(255, 242, 214, 0.55);
+  letter-spacing: 3px;
+}
+.sk-desc .sk-head {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--yellow);
+  margin-bottom: 4px;
+  text-shadow: 1px 1px 0 #4d0220;
+}
+.sk-desc .sk-head .sk-lv {
+  float: right;
+  font-size: 11px;
+  color: #ffd9a8;
+}
+.sk-desc .sk-body {
+  color: #fff2d6;
+  min-height: 32px;
+}
+.sk-desc .sk-foot {
+  margin-top: 4px;
+  font-size: 9px;
+  color: #ffd9a8;
+}
+.sk-desc .sk-foot.bad { color: #ff9a8f; }
+.sk-desc .sk-foot.ok { color: #ffbf29; }
+
+/* 行选择热区 */
+.sk-row {
+  position: absolute;
+  z-index: 4;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  outline: none;
+}
+.sk-row:hover { background: rgba(255, 241, 160, 0.10); }
+.sk-row.on {
+  background: rgba(255, 241, 160, 0.16);
+  box-shadow: inset 0 0 0 2px rgba(255, 191, 41, 0.85);
+}
+
+/* 元素图标 */
+.sk-icon {
+  position: absolute;
+  z-index: 5;
+  pointer-events: none;
+}
+.sk-icon img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  image-rendering: pixelated;
+}
+
+/* 等级格 */
+.sk-cell {
+  position: absolute;
+  z-index: 5;
+  pointer-events: none;
+  background: transparent;
+}
+.sk-cell.on {
+  background: #ffbf29;
+  box-shadow: inset 0 0 0 2px #fff2d6, 0 0 0 1px #7a0b30;
+}
+.sk-cell.on.max {
+  background: -webkit-linear-gradient(top, #ffe680, #ffbf29);
+  background: linear-gradient(#ffe680, #ffbf29);
+}
+
+/* UP 按钮：底图自带 UP 字样，这里只做透明热区 */
+.sk-up {
+  position: absolute;
+  z-index: 6;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  outline: none;
+}
+.sk-up:hover { background: rgba(255, 241, 160, 0.22); }
+.sk-up:active { background: rgba(255, 241, 160, 0.4); }
+.sk-up.off { cursor: default; }
+.sk-up.off:hover { background: none; }
+.sk-up.off:active { background: none; }
+
+/* 返回键：右下角 */
+.skill-back {
+  position: absolute;
+  right: 8px;
+  bottom: 6px;
+}

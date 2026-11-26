@@ -156,6 +156,15 @@
       </div>
     </section>
 
+    <!-- ================= 技能 ================= -->
+    <!-- 左：角色窗口  右上：选中技能说明  右下：三个元素技能（图标 + 6 格 + UP） -->
+    <section class="screen skill-screen hidden" id="skillScreen">
+      <img class="skill-bg" src="./assets/skill.png" alt="技能">
+      <div class="skill-grid" id="skGrid"></div>
+      <div class="lv-tip" id="skTip"></div>
+      <button type="button" class="px-btn skill-back" id="skBack">返回</button>
+    </section>
+
     <!-- ================= 图鉴 ================= -->
     <!-- 整张「图鉴界面」当底图，16 个窗口 + 左右翻页箭头压在上面 -->
     <section class="screen guide-screen hidden" id="guideScreen">
@@ -181,6 +190,7 @@
 <script defer src="./src/data/elements.js"></script>
 <script defer src="./src/data/statuses.js"></script>
 <script defer src="./src/data/skills.js"></script>
+<script defer src="./src/data/skills-level.js"></script>
 <script defer src="./src/data/stats.js"></script>
 <script defer src="./src/data/stars.js"></script>
 <script defer src="./src/data/curve.js"></script>
@@ -196,6 +206,7 @@
 <script defer src="./src/ui/select.js"></script>
 <script defer src="./src/ui/level.js"></script>
 <script defer src="./src/ui/star.js"></script>
+<script defer src="./src/ui/skill.js"></script>
 <script defer src="./src/engine/battle.js"></script>
 <script defer src="./src/main.js"></script>
 <!-- 网页版强制全屏增强：小工具版本（dist/index.html）不加载这一行 -->

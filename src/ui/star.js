@@ -277,7 +277,7 @@ const StarUp = (function () {
       st0.stars = Math.max(0, Math.min(STAR.MAX, Math.floor(debugStars)));
     }
     /* 打开时把其它界面收起来，避免叠在一起 */
-    ['levelScreen', 'manageScreen', 'guideScreen', 'subScreen', 'menuScreen'].forEach(function (id) {
+    ['levelScreen', 'skillScreen', 'manageScreen', 'guideScreen', 'subScreen', 'menuScreen'].forEach(function (id) {
       var n = el(id);
       if (n) n.classList.add('hidden');
     });

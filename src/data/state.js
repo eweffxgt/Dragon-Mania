@@ -23,7 +23,7 @@
  *      同时给 hydrate 的默认值，缺字段的老档才能平滑升级
  * ========================================================= */
 const PlayerState = (function () {
-  var SAVE_VERSION = 3;
+  var SAVE_VERSION = 4;
   var DEFAULT_GOLD = 1000000;    /* 初始金币 100 万（只对第一次玩的新档生效） */
   var DEFAULT_FRUIT = 100000;    /* 初始果实 10 万 */
   var DEFAULT_LEVEL = 10;        /* 所有角色初始等级 */
@@ -102,6 +102,24 @@ const PlayerState = (function () {
   }
 
   /* ---------- 水晶（升星材料，按元素分） ---------- */
+  /* ---------- 技能等级（element -> 0..6） ---------- */
+  function skillLevel(name, element) {
+    var e = name ? entries[name] : null;
+    if (!e || !e.skills) return 0;
+    var v = Math.floor(Number(e.skills[element]) || 0);
+    return v > 0 ? v : 0;
+  }
+
+  function setSkillLevel(name, element, level) {
+    if (!name || !element) return 0;
+    var e = entry(name);
+    var v = Math.floor(Number(level) || 0);
+    if (v < 0) v = 0;
+    if (v > 6) v = 6;
+    e.skills[element] = v;
+    return v;
+  }
+
   function crystalOf(element) {
     if (!element) return 0;
     return crystals[element] || 0;
@@ -178,8 +196,18 @@ const PlayerState = (function () {
       v = 3;
     }
 
+    if (v < 4) {
+      /* v3 -> v4：技能等级系统上线，老档所有角色的技能一律归 0 */
+      data.chars = data.chars || {};
+      Object.keys(data.chars).forEach(function (k) {
+        data.chars[k] = data.chars[k] || {};
+        data.chars[k].skills = {};
+      });
+      v = 4;
+    }
+
     /* 留给下个版本：
-     * if (v < 4) { ...; v = 4; }
+     * if (v < 5) { ...; v = 5; }
      */
 
     data.v = v;
@@ -254,6 +282,8 @@ const PlayerState = (function () {
     entry: entry,
     levelOf: levelOf,
     crystalOf: crystalOf,
+    skillLevel: skillLevel,
+    setSkillLevel: setSkillLevel,
     addCrystal: addCrystal,
     spendCrystal: spendCrystal,
     crystalMap: crystalMap,

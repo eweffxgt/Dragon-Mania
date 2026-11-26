@@ -845,6 +845,19 @@ const Battle = (function () {
   }
 
   /* ================= 构造战斗 ================= */
+  /* 按角色的技能等级生成三张技能卡
+   *   我方：读 PlayerState 里买的等级（默认 0）
+   *   敌方：按自身等级推算，Lv5 = 0 级，Lv90 以上 = 满级 6 */
+  function buildSkillCards(elements, side, lv, name) {
+    if (typeof skillsOfLevels !== 'function') return skillsOfElements(elements);
+    if (side === 'ally' && typeof PlayerState !== 'undefined') {
+      var lvMap = PlayerState.entry(name, lv).skills || {};
+      return skillsOfLevels(elements, lvMap, 0);
+    }
+    var auto = Math.max(0, Math.min(6, Math.floor(lv / 15)));
+    return skillsOfLevels(elements, null, auto);
+  }
+
   function makeChar(tpl, side, slot) {
     const elements = (tpl.elements || [tpl.element]).slice();
     /* 等级决定属性：血量 / 攻击都走成长曲线（src/data/curve.js） */
@@ -877,7 +890,7 @@ const Battle = (function () {
       hp: cs ? Math.round(cs.hp * starK) : tpl.hp,
       atk: cs ? Math.round(cs.atk * starK) : tpl.atk,
       crit: tpl.crit == null ? 10 : tpl.crit,
-      skills: skillsOfElements(elements),
+      skills: buildSkillCards(elements, side, lv, tpl.name),
       statuses: [],
       alive: true,
     };

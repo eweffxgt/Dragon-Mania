@@ -223,7 +223,10 @@
 
   function openResetConfirm() {
     const d = el('resetConfirm');
+    const inp = el('eggInput');
+    if (inp) inp.value = '';
     if (d) d.classList.remove('hidden');
+    if (inp) setTimeout(() => inp.focus(), 30);
   }
 
   function closeResetConfirm() {
@@ -231,12 +234,32 @@
     if (d) d.classList.add('hidden');
   }
 
-  function doResetSave() {
-    closeResetConfirm();
-    if (typeof PlayerState !== 'undefined') {
-      PlayerState.reset();          /* 清空角色 + 星光 + 金币果实回默认，并落盘 */
-      if (typeof UI !== 'undefined' && UI.refresh) UI.refresh();
+  /* 彩蛋指令：
+   *   00522 → 获得 1000 万金币（可重复）
+   *   00110 → 重置存档
+   * 其它输入不做任何事 */
+  function submitEggCode() {
+    const inp = el('eggInput');
+    const code = ((inp && inp.value) || '').trim();
+    if (code === '00522') {
+      if (typeof PlayerState !== 'undefined') {
+        PlayerState.wallet.gold += 10000000;
+        PlayerState.save();
+      }
+      closeResetConfirm();
+      showMenu();
+      return;
     }
+    if (code === '00110') {
+      closeResetConfirm();
+      if (typeof PlayerState !== 'undefined') {
+        PlayerState.reset();
+        if (typeof UI !== 'undefined' && UI.refresh) UI.refresh();
+      }
+      showMenu();
+      return;
+    }
+    closeResetConfirm();
     showMenu();
   }
 
@@ -251,10 +274,16 @@
     if (dl) dl.addEventListener('click', function () { dragonTap('L'); });
     if (dr) dr.addEventListener('click', function () { dragonTap('R'); });
 
-    const yes = el('resetYes');
-    const no = el('resetNo');
-    if (yes) yes.addEventListener('click', doResetSave);
-    if (no) no.addEventListener('click', closeResetConfirm);
+    const okBtn = el('eggOk');
+    const cancelBtn = el('eggCancel');
+    const inp = el('eggInput');
+    if (okBtn) okBtn.addEventListener('click', submitEggCode);
+    if (cancelBtn) cancelBtn.addEventListener('click', function () { closeResetConfirm(); showMenu(); });
+    if (inp) {
+      inp.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') submitEggCode();
+      });
+    }
 
     if (fight) {
       fight.addEventListener('click', function () {

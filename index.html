@@ -74,10 +74,11 @@
       <button type="button" class="menu-dragon right" id="menuDragonR" tabindex="-1" aria-hidden="true"></button>
       <div class="px-confirm hidden" id="resetConfirm">
         <div class="px-confirm-box">
-          <div class="px-confirm-title">是否重置存档？</div>
+          <div class="px-confirm-title">请输入指令</div>
+          <input type="text" class="egg-input" id="eggInput" maxlength="8" autocomplete="off">
           <div class="px-confirm-btns">
-            <button type="button" class="px-btn big" id="resetYes">是</button>
-            <button type="button" class="px-btn big" id="resetNo">否</button>
+            <button type="button" class="px-btn big" id="eggOk">确认</button>
+            <button type="button" class="px-btn big" id="eggCancel">取消</button>
           </div>
         </div>
       </div>

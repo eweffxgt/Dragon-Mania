@@ -150,8 +150,11 @@ const RuneUp = (function () {
     var rec = list[selected];
     var def = RUNN_DEF(rec);
     var color = RUNE.COLOR[rec.r] || '#fff2d6';
+    var extra = '生命 +' + RUNE.hpBonus(rec.t, rec.r) + '%　攻击 +' +
+      RUNE.atkBonus(rec.t, rec.r) + '%';
     return '<div class="rn-head"><span style="color:' + color + '">【' +
       RUNE.RARITY[rec.r] + '】' + def.name + '</span></div>' +
+      '<div class="rn-bonus">' + extra + '</div>' +
       '<div class="rn-body">' + RUNE.desc(rec.t, rec.r) + '</div>';
   }
 

@@ -999,6 +999,10 @@ const Battle = (function () {
       ? (PlayerState.entry(tpl.name, tpl.level).stars || 0)
       : 0;
     const starK = (typeof starMult === 'function') ? starMult(stars) : 1;
+    /* 魔符装备增益：生命 / 攻击各自按百分比加成（在星级之后乘） */
+    const runeFxTmp = buildRuneFx(side, tpl.name);
+    const runeHpK = 1 + (runeFxTmp.hpPct || 0) / 100;
+    const runeAtkK = 1 + (runeFxTmp.atkPct || 0) / 100;
     return {
       uid: (side === 'ally' ? 'p' : 'e') + slot,
       side,
@@ -1011,12 +1015,12 @@ const Battle = (function () {
       avatarUrl: tpl.avatarUrl || '',
       /* 每局重建角色，对手龙固定 100% 生命开局，不继承上一局的损耗 */
       stars: stars,
-      maxHp: cs ? Math.round(cs.hp * starK) : tpl.hp,
-      hp: cs ? Math.round(cs.hp * starK) : tpl.hp,
-      atk: cs ? Math.round(cs.atk * starK) : tpl.atk,
+      maxHp: cs ? Math.round(cs.hp * starK * runeHpK) : tpl.hp,
+      hp: cs ? Math.round(cs.hp * starK * runeHpK) : tpl.hp,
+      atk: cs ? Math.round(cs.atk * starK * runeAtkK) : tpl.atk,
       crit: tpl.crit == null ? 10 : tpl.crit,
       skills: buildSkillCards(elements, side, lv, tpl.name),
-      runeFx: buildRuneFx(side, tpl.name),
+      runeFx: runeFxTmp,
       runeMute: false,
       statuses: [],
       alive: true,

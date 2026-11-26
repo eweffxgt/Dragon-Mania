@@ -1832,3 +1832,27 @@ button { font-family: inherit; }
   margin-right: 8px;
   image-rendering: pixelated;
 }
+
+/* 魔符装备增益那行 */
+.rn-bonus {
+  font-size: 9px;
+  color: #9fe0a0;
+  margin-bottom: 2px;
+}
+
+/* 彩蛋指令输入框 */
+.egg-input {
+  display: block;
+  width: 240px;
+  margin: 14px auto 0;
+  padding: 8px 10px;
+  font-family: inherit;
+  font-size: 22px;
+  letter-spacing: 8px;
+  text-align: center;
+  color: #ffbf29;
+  background: #2a0812;
+  border: 3px solid #ffbf29;
+  outline: none;
+}
+.egg-input:focus { border-color: #fef22e; }

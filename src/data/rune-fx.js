@@ -7,16 +7,23 @@
 const RuneFx = (function () {
   /* 由装备列表生成效果表；没有魔符返回 {} */
   function build(recs) {
-    var fx = {};
+    var fx = { hpPct: 0, atkPct: 0 };
     (recs || []).forEach(function (rec) {
       if (!rec || typeof rec.t !== 'number') return;
       var def = RUNE.DEFS[rec.t];
       if (!def) return;
       var v = RUNE.value(rec.t, rec.r);
       if (fx[def.id] == null || v > fx[def.id]) fx[def.id] = v;
+      /* 装备即生效的生命 / 攻击增益 */
+      fx.hpPct += RUNE.hpBonus(rec.t, rec.r);
+      fx.atkPct += RUNE.atkBonus(rec.t, rec.r);
     });
     return fx;
   }
+
+  /* 生命 / 攻击的装备增益（百分比，可被「封符」屏蔽） */
+  function hpPct(char) { return of(char).hpPct || 0; }
+  function atkPct(char) { return of(char).atkPct || 0; }
 
   /* 被「征服」封印时所有魔符失效 */
   function of(char) {
@@ -58,6 +65,8 @@ const RuneFx = (function () {
 
   return {
     build: build,
+    hpPct: hpPct,
+    atkPct: atkPct,
     of: of,
     val: val,
     directBonus: directBonus,

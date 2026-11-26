@@ -27,9 +27,12 @@ const SkillUp = (function () {
   /* 每行六个等级格 */
   var CELL_X = [384, 435, 485, 536, 587, 637];
   var CELL_W = 25, CELL_H = 38;
-  /* 元素图标框 */
-  var ICON = { dx: -68, w: 44, h: 40, dy: -4 };
+  /* 元素图标：底图图标框内芯（源图实测）设计坐标
+   *   x 320.80..358.79  y 205.80..243.60，中心 (339.73, 224.63)
+   * 每行往下 63px 重复；32×32 的图标严格居中到内芯中心。 */
   var ICON_IMG = 32;
+  var ICON_LEFT = 323.73;        /* 339.73 - 16 */
+  var ICON_TOP_OFFSET = 2.63;    /* rowY 206 -> 208.63，中心 224.63 */
   /* UP 按钮 */
   var UP = { x: 692, w: 76, h: 29, dy: 4 };
 
@@ -121,7 +124,7 @@ const SkillUp = (function () {
       var on = (selected === elId);
 
       /* 行选择热区（图标 + 六个格子） */
-      var rowLeft = 384 + ICON.dx;
+      var rowLeft = 316;
       var rowW = (CELL_X[CELL_X.length - 1] + CELL_W) - rowLeft;
       html += '<button type="button" class="sk-row' + (on ? ' on' : '') + '" data-el="' + elId + '"' +
               ' style="left:' + rowLeft + 'px;top:' + (y - 6) + 'px;width:' + rowW +
@@ -129,8 +132,8 @@ const SkillUp = (function () {
 
       /* 元素图标 */
       var icon = (typeof ELEMENTS !== 'undefined' && ELEMENTS[elId] && ELEMENTS[elId].iconUrl) || '';
-      html += '<div class="sk-icon" style="left:' + (384 + ICON.dx + (ICON.w - ICON_IMG) / 2) +
-              'px;top:' + (y + ICON.dy + (ICON.h - ICON_IMG) / 2) + 'px;width:' + ICON_IMG +
+      html += '<div class="sk-icon" style="left:' + ICON_LEFT +
+              'px;top:' + (y + ICON_TOP_OFFSET) + 'px;width:' + ICON_IMG +
               'px;height:' + ICON_IMG + 'px;">' +
               (icon ? '<img src="' + icon + '" alt="">' : '') + '</div>';
 

@@ -239,6 +239,19 @@
     }
   }
 
+  let eggTimer = 0;
+  /* 指令执行完给一行文字结果，然后自动关掉 */
+  function eggResult(text) {
+    const title = el('resetConfirm') ? el('resetConfirm').querySelector('.px-confirm-title') : null;
+    if (title) title.textContent = text;
+    if (eggTimer) clearTimeout(eggTimer);
+    eggTimer = setTimeout(function () {
+      eggTimer = 0;
+      closeResetConfirm();
+      showMenu();
+    }, 1100);
+  }
+
   function openResetConfirm() {
     const d = el('resetConfirm');
     const inp = el('eggInput');
@@ -265,8 +278,7 @@
         PlayerState.wallet.gold += 10000000;
         PlayerState.save();
       }
-      closeResetConfirm();
-      showMenu();
+      eggResult('金币 +1000 万');
       return;
     }
     if (code === '00129') {
@@ -283,8 +295,8 @@
         }
         PlayerState.save();
       }
-      closeResetConfirm();
-      showMenu();
+      eggResult('已获得 传奇·接纳 ×3 + 传奇·奇迹 ×3');
+      if (typeof RuneUp !== 'undefined') RuneUp.render();
       return;
     }
     if (code === '00110') {

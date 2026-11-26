@@ -160,13 +160,9 @@ const RuneUp = (function () {
     for (var i = 0; i < cells.length; i++) {
       cells[i].addEventListener('click', function (e) {
         var idx = Number(e.currentTarget.getAttribute('data-idx'));
-        if (selected === idx) {
-          doEquip(list[idx]);
-        } else {
-          selected = idx;
-          if (typeof Sfx !== 'undefined' && Sfx.click) Sfx.click();
-          render();
-        }
+        selected = idx;
+        if (typeof Sfx !== 'undefined' && Sfx.click) Sfx.click();
+        openAction(list[idx]);
       });
     }
 
@@ -176,7 +172,7 @@ const RuneUp = (function () {
         var s = Number(e.currentTarget.getAttribute('data-slot'));
         var eq = PlayerState.equippedOf(current.name);
         if (!eq[s]) return;
-        eq[s] = null;
+        PlayerState.unequipRune(current.name, s);
         PlayerState.save();
         if (typeof Sfx !== 'undefined' && Sfx.click) Sfx.click();
         render();
@@ -199,14 +195,71 @@ const RuneUp = (function () {
     }
   }
 
-  function doEquip(rec) {
+  /* ---------- 点击魔符后的操作弹窗 ---------- */
+  var actionRec = null;
+
+  function openAction(rec) {
     if (!rec) return;
-    var eq = PlayerState.equippedOf(current.name);
-    var slot = eq[0] ? (eq[1] ? 0 : 1) : 0;
-    eq[slot] = { t: rec.t, r: rec.r };
+    actionRec = rec;
+    var box = el('rnAction');
+    var title = el('rnActionTitle');
+    var icon = el('rnActionIcon');
+    if (title) {
+      title.textContent = '要对其做什么操作';
+    }
+    if (icon) {
+      icon.innerHTML = '<img src="' + RUNE.sprite(rec.r, rec.t) + '" alt="">';
+      icon.appendChild(document.createTextNode(RUNE.RARITY[rec.r] + '·' + RUNN_DEF(rec).name));
+    }
+    if (box) box.classList.remove('hidden');
+    render();
+  }
+
+  function closeAction() {
+    var box = el('rnAction');
+    if (box) box.classList.add('hidden');
+    actionRec = null;
+  }
+
+  function doCombine() {
+    if (!actionRec) return;
+    var same = PlayerState.runeList().filter(function (x) {
+      return x.t === actionRec.t && x.r === actionRec.r;
+    }).length;
+    var need = RUNE.COMBINE_NEED;
+    if (actionRec.r >= 4) {
+      tip('已经是最高稀有度');
+      return;
+    }
+    if (same < need) {
+      tip('数量不足（' + same + ' / ' + need + '）');
+      return;
+    }
+    PlayerState.combineRune(actionRec.t, actionRec.r);
     PlayerState.save();
+    closeAction();
     if (typeof Sfx !== 'undefined' && Sfx.select) Sfx.select();
-    tip('装备 ' + RUNE.RARITY[rec.r] + '·' + RUNN_DEF(rec).name);
+    tip('合成成功');
+    selected = null;
+    render();
+  }
+
+  function doEquip() {
+    if (!actionRec) return;
+    var r = PlayerState.equipRune(current.name, actionRec);
+    if (r === 'full') {
+      tip('魔符已满');
+      return;
+    }
+    if (r !== 'ok') {
+      closeAction();
+      return;
+    }
+    PlayerState.save();
+    closeAction();
+    if (typeof Sfx !== 'undefined' && Sfx.select) Sfx.select();
+    tip('已装备');
+    selected = null;
     render();
   }
 
@@ -219,6 +272,7 @@ const RuneUp = (function () {
         var n = el(id);
         if (n) n.classList.add('hidden');
       });
+    closeAction();
     var s = el('runeScreen');
     if (s) s.classList.remove('hidden');
     render();
@@ -230,6 +284,13 @@ const RuneUp = (function () {
   }
 
   function bind() {
+    var yes = el('rnCombine');
+    var eqBtn = el('rnEquipBtn');
+    var cancel = el('rnCancel');
+    if (yes) yes.addEventListener('click', doCombine);
+    if (eqBtn) eqBtn.addEventListener('click', doEquip);
+    if (cancel) cancel.addEventListener('click', closeAction);
+
     var b = el('rnBack');
     if (b) {
       b.addEventListener('click', function () {

@@ -417,15 +417,6 @@ const Battle = (function () {
         st.runeDrops = st.runeDrops || [];
         st.runeDrops.push(drop);
         PlayerState.addRune(drop.t, drop.r);
-        let merged = true;
-        while (merged) {
-          merged = false;
-          for (let rr = 0; rr < 4 && !merged; rr++) {
-            for (let tt = 0; tt < RUNE.DEFS.length && !merged; tt++) {
-              if (PlayerState.combineRune(tt, rr)) merged = true;
-            }
-          }
-        }
         PlayerState.save();
       }
 

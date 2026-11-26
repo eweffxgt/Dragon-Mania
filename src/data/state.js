@@ -23,7 +23,7 @@
  *      同时给 hydrate 的默认值，缺字段的老档才能平滑升级
  * ========================================================= */
 const PlayerState = (function () {
-  var SAVE_VERSION = 5;
+  var SAVE_VERSION = 6;
   var DEFAULT_GOLD = 1000000;    /* 初始金币 100 万（只对第一次玩的新档生效） */
   var DEFAULT_FRUIT = 100000;    /* 初始果实 10 万 */
   var DEFAULT_LEVEL = 10;        /* 所有角色初始等级 */
@@ -33,7 +33,8 @@ const PlayerState = (function () {
   var entries = {};              /* name -> { level, feed, stars, runes, skills } */
   var wallet = { gold: DEFAULT_GOLD, fruit: DEFAULT_FRUIT };
   var crystals = {};             /* 元素 id -> 水晶数量 */
-  var runes = [];                /* 魔符库存 [{t, r}] */
+  var runes = [];                /* 魔符库存 [{id, t, r}] */
+  var nextRuneId = 1;            /* 递增 id，装备时要按 id 扣库存 */
   var equipped = {};             /* 角色名 -> [{t,r}|null, {t,r}|null] */
   var savedAt = 0;
 
@@ -151,9 +152,18 @@ const PlayerState = (function () {
   function runeList() { return runes; }
 
   function addRune(t, r) {
-    var rec = { t: Math.max(0, Math.floor(t || 0)), r: Math.max(0, Math.min(4, Math.floor(r || 0))) };
+    var rec = {
+      id: nextRuneId++,
+      t: Math.max(0, Math.floor(t || 0)),
+      r: Math.max(0, Math.min(4, Math.floor(r || 0)))
+    };
     runes.push(rec);
     return rec;
+  }
+
+  function runeById(id) {
+    for (var i = 0; i < runes.length; i++) if (runes[i].id === id) return runes[i];
+    return null;
   }
 
   function removeRune(rec) {
@@ -177,11 +187,28 @@ const PlayerState = (function () {
     return e;
   }
 
-  function equipRune(name, slot, rec) {
+  /* 装备：把库存里的这个魔符移到角色身上；两个位都满返回 'full' */
+  function equipRune(name, rec) {
+    if (!name || !rec) return 'no';
+    var e = equippedOf(name);
+    var slot = e[0] ? (e[1] ? -1 : 1) : 0;
+    if (slot < 0) return 'full';
+    var idx = runes.indexOf(rec);
+    if (idx < 0) return 'no';
+    runes.splice(idx, 1);
+    e[slot] = rec;
+    return 'ok';
+  }
+
+  /* 卸下：把魔符还回库存 */
+  function unequipRune(name, slot) {
     var e = equippedOf(name);
     var i = Math.floor(slot);
-    if (i < 0 || i > 1) return;
-    e[i] = rec || null;
+    if (i < 0 || i > 1 || !e[i]) return null;
+    var rec = e[i];
+    e[i] = null;
+    runes.push(rec);
+    return rec;
   }
 
   function levelOf(name, fallback) {
@@ -207,11 +234,12 @@ const PlayerState = (function () {
       ts: Date.now(),
       chars: chars,
       crystals: crystalMap(),
-      runes: runes.map(function (x) { return { t: x.t, r: x.r }; }),
+      runes: runes.map(function (x) { return { id: x.id, t: x.t, r: x.r }; }),
+      nextRuneId: nextRuneId,
       equipped: (function () {
         var out = {};
         Object.keys(equipped).forEach(function (k) {
-          out[k] = equipped[k].map(function (x) { return x ? { t: x.t, r: x.r } : null; });
+          out[k] = equipped[k].map(function (x) { return x ? { id: x.id, t: x.t, r: x.r } : null; });
         });
         return out;
       })(),
@@ -260,8 +288,30 @@ const PlayerState = (function () {
       v = 5;
     }
 
+    if (v < 6) {
+      /* v5 -> v6：魔符改为「装备即从库存扣掉」，需要唯一 id */
+      data.runes = Array.isArray(data.runes) ? data.runes : [];
+      var nid = Number(data.nextRuneId) || 1;
+      data.runes.forEach(function (x) {
+        if (x && !x.id) x.id = nid++;
+      });
+      data.equipped = data.equipped && typeof data.equipped === 'object' ? data.equipped : {};
+      Object.keys(data.equipped).forEach(function (k) {
+        var arr = data.equipped[k];
+        if (!Array.isArray(arr)) { data.equipped[k] = [null, null]; return; }
+        data.equipped[k] = [0, 1].map(function (i) {
+          var x = arr[i];
+          if (!x || typeof x.t !== 'number') return null;
+          if (!x.id) x.id = nid++;
+          return { id: x.id, t: Math.floor(x.t), r: Math.floor(x.r || 0) };
+        });
+      });
+      data.nextRuneId = nid;
+      v = 6;
+    }
+
     /* 留给下个版本：
-     * if (v < 6) { ...; v = 6; }
+     * if (v < 7) { ...; v = 7; }
      */
 
     data.v = v;
@@ -300,9 +350,17 @@ const PlayerState = (function () {
       runes = data.runes
         .filter(function (x) { return x && typeof x.t === 'number'; })
         .map(function (x) {
-          return { t: Math.max(0, Math.floor(x.t)), r: Math.max(0, Math.min(4, Math.floor(x.r || 0))) };
+          return {
+            id: Math.floor(Number(x.id) || 0) || nextRuneId++,
+            t: Math.max(0, Math.floor(x.t)),
+            r: Math.max(0, Math.min(4, Math.floor(x.r || 0)))
+          };
         });
+      runes.forEach(function (x) { if (x.id >= nextRuneId) nextRuneId = x.id + 1; });
       changed = true;
+    }
+    if (typeof data.nextRuneId === 'number' && data.nextRuneId > nextRuneId) {
+      nextRuneId = Math.floor(data.nextRuneId);
     }
     if (data.equipped && typeof data.equipped === 'object') {
       Object.keys(data.equipped).forEach(function (k) {
@@ -311,7 +369,11 @@ const PlayerState = (function () {
         equipped[k] = [0, 1].map(function (i) {
           var x = arr[i];
           if (!x || typeof x.t !== 'number') return null;
-          return { t: Math.max(0, Math.floor(x.t)), r: Math.max(0, Math.min(4, Math.floor(x.r || 0))) };
+          return {
+            id: Math.floor(Number(x.id) || 0) || nextRuneId++,
+            t: Math.max(0, Math.floor(x.t)),
+            r: Math.max(0, Math.min(4, Math.floor(x.r || 0)))
+          };
         });
       });
       changed = true;
@@ -347,6 +409,7 @@ const PlayerState = (function () {
     crystals = {};
     runes = [];
     equipped = {};
+    nextRuneId = 1;
     if (!keepWallet) {
       wallet.gold = DEFAULT_GOLD;
       wallet.fruit = DEFAULT_FRUIT;
@@ -360,10 +423,12 @@ const PlayerState = (function () {
     crystalOf: crystalOf,
     runeList: runeList,
     addRune: addRune,
+    runeById: runeById,
     removeRune: removeRune,
     combineRune: combineRune,
     equippedOf: equippedOf,
     equipRune: equipRune,
+    unequipRune: unequipRune,
     skillLevel: skillLevel,
     setSkillLevel: setSkillLevel,
     addCrystal: addCrystal,

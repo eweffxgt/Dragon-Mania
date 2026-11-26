@@ -1809,3 +1809,26 @@ button { font-family: inherit; }
   image-rendering: pixelated;
 }
 .ov-rune-more { margin-left: 4px; color: #fff2d6; }
+
+/* 魔符操作弹窗里的图标 + 名字 */
+.rn-action-icon {
+  margin-top: 10px;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  -webkit-box-pack: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+  font-size: 10px;
+  color: #fff2d6;
+  letter-spacing: 1px;
+}
+.rn-action-icon img {
+  width: 30px;
+  height: 30px;
+  margin-right: 8px;
+  image-rendering: pixelated;
+}

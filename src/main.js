@@ -90,11 +90,29 @@
       if (on) Sfx.click();
     });
 
+    /* 重开 = 离开战斗：先确认，再按已击杀数结算 */
     btnRestart.addEventListener('click', () => {
-      UI.clearOverlay();
-      Battle.init();
       Sfx.click();
+      const d = el('leaveConfirm');
+      if (d) d.classList.remove('hidden');
     });
+    const leaveYes = el('leaveYes');
+    const leaveNo = el('leaveNo');
+    if (leaveYes) {
+      leaveYes.addEventListener('click', () => {
+        const d = el('leaveConfirm');
+        if (d) d.classList.add('hidden');
+        Sfx.select();
+        if (typeof Battle !== 'undefined' && Battle.quit) Battle.quit();
+      });
+    }
+    if (leaveNo) {
+      leaveNo.addEventListener('click', () => {
+        const d = el('leaveConfirm');
+        if (d) d.classList.add('hidden');
+        Sfx.click();
+      });
+    }
 
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {

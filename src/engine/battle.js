@@ -948,6 +948,13 @@ const Battle = (function () {
 
     if (st.token !== token) return;
     checkEnd(st);
+    await settleBattle(st);
+  }
+
+  /* 结算：击杀奖励 + 战果弹窗（自然结束和中途离开共用） */
+  async function settleBattle(st) {
+    if (!st || st.settled) return;
+    st.settled = true;
     st.phase = 'over';
     st.kills = kills;
     st.reward = kills * KILL_REWARD;
@@ -960,6 +967,16 @@ const Battle = (function () {
     await sleep(400);
     UI.gameOver(st.result, st);
     Sfx.lose();
+  }
+
+  /* 中途离开战斗：作废当前回合循环，直接按已击杀数结算 */
+  function quit() {
+    const st = S;
+    if (!st || st.over) return;
+    token += 1;                 /* 让正在跑的循环失效 */
+    st.over = true;
+    st.result = 'lose';
+    settleBattle(st);
   }
 
   /* ================= 构造战斗 ================= */
@@ -1217,6 +1234,7 @@ const Battle = (function () {
     isAuto: () => autoPlay,
     setTimeScale: (v) => { TS = v; },
     setSeed: setSeed,
+    quit: quit,
     getState: () => S,
   };
 })();

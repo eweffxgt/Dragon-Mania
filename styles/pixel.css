@@ -1665,3 +1665,147 @@ button { font-family: inherit; }
   right: 8px;
   bottom: 6px;
 }
+
+/* =========================================================
+ * 魔符界面
+ * ========================================================= */
+.rune-screen { background: #f0a020; }
+.rune-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 840px;
+  height: 420px;
+  display: block;
+}
+.rune-grid-box {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 840px;
+  height: 420px;
+}
+
+/* 已装备的两格 */
+.rn-slot {
+  position: absolute;
+  z-index: 4;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  outline: none;
+}
+.rn-slot img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  image-rendering: pixelated;
+}
+.rn-slot.empty {
+  background: #b10a2c;
+  box-shadow: inset 0 0 0 2px #6d0420;
+}
+.rn-slot.empty:hover { background: #c20e33; }
+
+/* 说明条 */
+.rn-desc {
+  position: absolute;
+  z-index: 3;
+  color: #fff2d6;
+  font-size: 9px;
+  line-height: 13px;
+  overflow: hidden;
+}
+.rn-desc .rn-none {
+  text-align: center;
+  line-height: 50px;
+  color: rgba(255, 242, 214, 0.55);
+  letter-spacing: 2px;
+}
+.rn-desc .rn-head {
+  font-size: 11px;
+  font-weight: 700;
+  margin-bottom: 2px;
+}
+.rn-desc .rn-body { color: #fff2d6; }
+
+/* 库存格子 */
+.rn-cell {
+  position: absolute;
+  z-index: 4;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  outline: none;
+}
+.rn-cell img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  image-rendering: pixelated;
+}
+.rn-cell.empty {
+  background: #b10a2c;
+  box-shadow: inset 0 0 0 2px #6d0420;
+  cursor: default;
+}
+.rn-cell.on {
+  background: rgba(255, 241, 160, 0.2);
+}
+
+/* 翻页箭头 */
+.rn-arrow {
+  position: absolute;
+  z-index: 5;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  outline: none;
+}
+.rn-arrow::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-top: 11px solid transparent;
+  border-bottom: 11px solid transparent;
+}
+.rn-arrow.left::before {
+  border-right: 14px solid #6b0b28;
+  margin: -11px 0 0 -7px;
+}
+.rn-arrow.right::before {
+  border-left: 14px solid #6b0b28;
+  margin: -11px 0 0 -7px;
+}
+.rn-arrow:hover::before { opacity: 0.7; }
+.rn-arrow[disabled] { opacity: 0.25; cursor: default; }
+
+/* 返回键：右下角 */
+.rune-back {
+  position: absolute;
+  right: 8px;
+  bottom: 6px;
+}
+
+/* 结算里的魔符掉落 */
+.ov-runes {
+  margin-top: 6px;
+  font-size: 9px;
+  color: #ffd9a8;
+  line-height: 22px;
+}
+.ov-runes b { color: #ffbf29; }
+.ov-rune {
+  width: 22px;
+  height: 22px;
+  vertical-align: middle;
+  margin-left: 3px;
+  image-rendering: pixelated;
+}
+.ov-rune-more { margin-left: 4px; color: #fff2d6; }

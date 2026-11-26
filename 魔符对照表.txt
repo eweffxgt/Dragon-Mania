@@ -1,0 +1,30 @@
+奇迹	All Positive Effects cast by this Dragon are X% stronger. Note: Only affects the percentages that are based on the caster's HP or DMG stats.
+	42	90	216	385	720	、
+魔镜	X% Chance to duplicate a Negative Effect (direct or indirect) targeting this Dragon on the caster.
+	36	44	55	62	84	
+神龟	Area Damage attacks deal X% less damage to this Dragon.
+	21	38	49	60	75	
+汲取	The Dragon regenerates X% of its max HP when another Dragon is defeated. Note: When more Dragons are defeated, combined HP gained displays.
+	10	15	24	37	59	
+狂战	The lower this Dragon's HP (Y), the higher the bonus damage to its Direct Damage (up to X%). Note: Doesn't affect skill damage.
+	84	250 	 556	1010	1705
+接纳	Positive Effects on this Dragon are X% Stronger. Note:The Sigil only affects the percentages that are based on the caster's HP or DMG stats.
+	62	206	420	772	1517	
+巫术	All Negative Effects cast by this Dragon are X% stronger. Note: The Sigil only affects the percentages that are based on the caster's HP or DMG stats.
+	32	90	216	420	720	
+蛮勇	This Dragon sacrifices 15% of its HP for a Direct Damage boost of X% to its attack. Note: The boost is only activated while the Dragon's current HP is above 15%.
+	79	194	394	790	1471	
+残酷	50% Chance to critically hit and deal an extra X% Direct Damage. Note: The elemental weaknesses and strengths are also applied to the additional damage.
+	53	163	315	607	1021	
+闪避	X% Chance to dodge 90% of the direct damage. Note: Skills and area attacks are unaffected. 10% of the Direct Damage still occurs even if the Sigil was activated successfully.
+        26	35	47	57	78
+征服	X% Chance to mute all Sigils on primary target for 1 turn. Note: Inactive Sigils don't trigger their effects.
+	31	34	40	47	57	
+蔑视	All Negative Effects targeting this Dragon are X% weaker. Note: The Sigil only affects the percentages that are based on the caster's HP or DMG stats.
+	18	26	48	61	80	
+浩劫	Area Damage skills cast by this Dragon are X% stronger. Note: The Sigil only affects the percentages that are based on the caster's HP or DMG stats.
+	28	110	204	395	736	
+重生	When this Dragon is defeated, it returns to the battle (once) with X% of its original HP. Note: If the dragon is defeated by Damage over Time and gets reborn, it cannot attack in that turn.
+	21	30	41	48	59	
+纯净	The higher the Dragon's HP (Y), the bigger the damage bonus it gets (up to X%).
+	88	257	494	966	1895

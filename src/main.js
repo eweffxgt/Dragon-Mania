@@ -154,6 +154,10 @@
       SkillUp.open(char);
       return;
     }
+    if (act === 'rune') {
+      RuneUp.open(char);
+      return;
+    }
     showGrowth(label, char);
   }
 
@@ -186,6 +190,8 @@
     if (sts) sts.classList.add('hidden');
     const sks = el('skillScreen');
     if (sks) sks.classList.add('hidden');
+    const rns = el('runeScreen');
+    if (rns) rns.classList.add('hidden');
     const ss = el('selectScreen');
     if (ss) ss.classList.add('hidden');
     removeBoot();
@@ -327,6 +333,10 @@
     SkillUp.bind();
     SkillUp.onGrowth = function (act, label, char) { openGrowth(act, label, char); };
     SkillUp.onClose = function () { Manage.open(); };
+
+    RuneUp.bind();
+    RuneUp.onGrowth = function (act, label, char) { openGrowth(act, label, char); };
+    RuneUp.onClose = function () { Manage.open(); };
     LevelUp.onClose = function () { Manage.open(); };
     Manage.setOnOpen(openGrowth);
 
@@ -361,6 +371,8 @@
     } else if (screen === 'skill') {
       SkillUp.open(GUIDE_DEX[Number(params.get('idx')) || 0],
         params.get('el'), params.get('slv') == null ? null : Number(params.get('slv')));
+    } else if (screen === 'rune') {
+      RuneUp.open(GUIDE_DEX[Number(params.get('idx')) || 0]);
     } else if (screen === 'growth') {
       Manage.open(Number(params.get('page')) || 0);
       showGrowth(params.get('label') || '升 级', null);

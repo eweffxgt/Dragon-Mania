@@ -408,6 +408,7 @@ const UI = (function () {
         '<div class="ov-title ' + (win ? 'win' : 'lose') + '">战  果</div>' +
         '<div class="ov-kills">击杀 <b>' + kills + '</b> 个敌人</div>' +
         '<div class="ov-reward">获得 <b>' + fmtNum(reward) + '</b> 金币</div>' +
+        runeDropHtml(st) +
         '<div class="ov-sub">共经过 ' + st.round + ' 回合</div>' +
         '<div class="ov-list">' + rows + '</div>' +
         '<button type="button" class="px-btn big" id="ovExit">回 到 主 界 面</button>' +
@@ -422,6 +423,17 @@ const UI = (function () {
     }
   }
 
+
+  /* 本场掉落的魔符（最多显示 8 个图标） */
+  function runeDropHtml(st) {
+    const drops = st && st.runeDrops ? st.runeDrops : [];
+    if (!drops.length || typeof RUNE === 'undefined') return '';
+    const shown = drops.slice(0, 8).map(function (d) {
+      return '<img class="ov-rune" src="' + RUNE.sprite(d.r, d.t) + '" alt="">';
+    }).join('');
+    const more = drops.length > 8 ? '<span class="ov-rune-more">+' + (drops.length - 8) + '</span>' : '';
+    return '<div class="ov-runes">魔符 <b>' + drops.length + '</b> 个 ' + shown + more + '</div>';
+  }
   function clearOverlay() {
     if (!E) return;
     E.overlay.classList.add('hidden');

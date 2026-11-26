@@ -88,6 +88,22 @@ const Battle = (function () {
   /* ================= 状态 ================= */
   function applyStatus(char, def) {
     if (!char.alive) return null;
+
+    /* 魔符：按施法者 / 承受者调整效果强度 */
+    if (typeof RuneFx !== 'undefined' && (def.value || 0) > 0) {
+      const meta0 = STATUSES[def.id];
+      const positive = meta0 && meta0.kind === 'buff';
+      const caster0 = (S && S.byUid && def.casterUid) ? S.byUid[def.casterUid] : null;
+      let v = def.value;
+      if (positive) {
+        if (caster0) v *= RuneFx.positiveOut(caster0);
+        v *= RuneFx.positiveIn(char);
+      } else {
+        if (caster0) v *= RuneFx.negativeOut(caster0);
+        v *= RuneFx.negativeIn(char);
+      }
+      def = Object.assign({}, def, { value: Math.round(v * 10) / 10 });
+    }
     const meta = STATUSES[def.id];
     if (meta && meta.kind === 'debuff' && statusOf(char, 'immune')) {
       UI.log('　' + nameHtml(char) + ' 处于【负面免疫】，抵抗了【' + meta.name + '】', 'log-status');
@@ -125,6 +141,22 @@ const Battle = (function () {
       char.maxHp += add;
       char.hp += add;
       s.hpAdd = (s.hpAdd || 0) + add;
+    }
+
+    /* 魔符「魔镜」：把落在自己身上的负面效果复制给施放者 */
+    if (typeof RuneFx !== 'undefined' && !def.noMirror) {
+      const meta2 = STATUSES[def.id];
+      if (meta2 && meta2.kind === 'debuff' && def.casterUid && def.casterUid !== char.uid) {
+        const mv = RuneFx.val(char, 'mirror');
+        const caster2 = (S && S.byUid) ? S.byUid[def.casterUid] : null;
+        if (mv > 0 && caster2 && caster2.alive && rnd() * 100 < mv) {
+          UI.log('　' + nameHtml(char) + ' 的【魔镜】把' + meta2.name + '反射给了 ' + nameHtml(caster2), 'log-status');
+          applyStatus(caster2, {
+            id: def.id, turns: def.turns, value: def.value,
+            casterUid: char.uid, element: def.element, noMirror: true,
+          });
+        }
+      }
     }
     return s;
   }
@@ -205,8 +237,17 @@ const Battle = (function () {
     const mult = elementMatchup(element, target.element);
     dmg *= mult;
 
+    /* 魔符：狂战 / 纯净 / 蛮勇 的直接伤害加成 */
+    if (typeof RuneFx !== 'undefined') dmg *= 1 + RuneFx.directBonus(user);
+
     const crit = rnd() * 100 < (user.crit + um.critAdd);
     if (crit) dmg *= 1.6;
+
+    /* 魔符「残酷」：50% 概率额外暴击加伤 */
+    if (typeof RuneFx !== 'undefined') {
+      const cruel = RuneFx.val(user, 'cruel');
+      if (cruel > 0 && rnd() < 0.5) dmg *= 1 + cruel / 100;
+    }
     dmg *= rand(0.94, 1.06);
 
     /* 第 10 回合起「白热化」：伤害逐回合放大，避免互相治疗拖成僵局 */
@@ -238,6 +279,26 @@ const Battle = (function () {
       dmg -= rtCut;
     }
 
+    /* 魔符「闪避」：直接伤害有概率只吃 10% */
+    let dodged = false;
+    if (!opts.dot && dmg > 0 && typeof RuneFx !== 'undefined') {
+      const dv = RuneFx.val(target, 'dodge');
+      if (dv > 0 && rnd() * 100 < dv) {
+        dodged = true;
+        dmg = Math.max(1, Math.round(dmg * 0.1));
+      }
+    }
+
+    /* 魔符：神龟（受群体减伤）/ 浩劫（群体增伤） */
+    if (opts.dot && dmg > 0 && typeof RuneFx !== 'undefined') {
+      const tin = RuneFx.aoeIn(target);
+      if (tin > 0) dmg = Math.max(1, Math.round(dmg * (1 - tin)));
+      if (opts.source) {
+        const hout = RuneFx.aoeOut(opts.source);
+        if (hout > 0) dmg = Math.round(dmg * (1 + hout));
+      }
+    }
+
     const sh = statusOf(target, 'shield');
     if (sh && dmg > 0) {
       absorbed = Math.min(sh.value, dmg);
@@ -253,6 +314,7 @@ const Battle = (function () {
 
     UI.refresh(st);
 
+    if (dodged) UI.floatText(target.uid, '闪避', 'shield');
     if (guarded > 0) UI.floatText(target.uid, '减伤 -' + fmtNum(guarded), 'shield');
     if (rtCut > 0) UI.floatText(target.uid, '光环 -' + fmtNum(rtCut), 'shield');
     if (absorbed > 0) UI.floatText(target.uid, '盾 -' + fmtNum(absorbed), 'shield');
@@ -295,6 +357,16 @@ const Battle = (function () {
       Sfx.hit();
     }
 
+    /* 魔符「征服」：直接命中主目标时概率封印其魔符 1 回合 */
+    if (!opts.dot && opts.source && opts.source !== target && target.alive &&
+        typeof RuneFx !== 'undefined') {
+      const cv = RuneFx.val(opts.source, 'conquer');
+      if (cv > 0 && rnd() * 100 < cv) {
+        applyStatus(target, { id: 'runeMute', turns: 1, casterUid: opts.source.uid });
+        UI.log('　' + nameHtml(opts.source) + ' 的【征服】封印了 ' + nameHtml(target) + ' 的魔符', 'log-status');
+      }
+    }
+
     /* 复仇反击：被直接命中时把伤害反弹给攻击者（DoT / 反弹本身不再触发） */
     if (!opts.dot && !opts.reflect && opts.source && opts.source.uid !== target.uid) {
       const rt = statusOf(target, 'retaliate');
@@ -305,6 +377,21 @@ const Battle = (function () {
     }
 
     if (target.hp <= 0 && target.alive) {
+      /* 魔符「重生」：阵亡时以 X% 生命复活一次 */
+      if (typeof RuneFx !== 'undefined' && !target.reborn) {
+        const rb = RuneFx.val(target, 'rebirth');
+        if (rb > 0) {
+          target.reborn = true;
+          target.hp = Math.max(1, Math.round(target.maxHp * rb / 100));
+          UI.refresh(st);
+          UI.floatText(target.uid, '重生', 'heal');
+          UI.log('　' + nameHtml(target) + ' 的【重生】生效，以 ' + fmtNum(target.hp) + ' 点生命回到战场', 'log-heal');
+          await sleep(360);
+          checkEnd(st);
+          return dmg;
+        }
+      }
+
       target.alive = false;
       target.hp = 0;
       const revenge = statusOf(target, 'vengeance');
@@ -314,6 +401,34 @@ const Battle = (function () {
       Sfx.ko();
       await sleep(420);
       if (revenge && st.token === token) await triggerVengeance(st, target, revenge);
+
+      /* 魔符「汲取」：其他龙阵亡时给自己回血 */
+      if (typeof RuneFx !== 'undefined' && st.token === token && !st.over) {
+        const others = st.chars.filter(function (c) { return c.alive && c.uid !== target.uid; });
+        for (let i = 0; i < others.length; i++) {
+          const ab = RuneFx.val(others[i], 'absorb');
+          if (ab > 0) await heal(st, others[i], others[i].maxHp * ab / 100, '汲取');
+        }
+      }
+
+      /* 击杀掉落魔符（只有敌方阵亡时掉；五个同级自动合成一个高一级） */
+      if (target.side === 'enemy' && typeof RUNE !== 'undefined' && typeof PlayerState !== 'undefined') {
+        const drop = RUNE.rollDrop();
+        st.runeDrops = st.runeDrops || [];
+        st.runeDrops.push(drop);
+        PlayerState.addRune(drop.t, drop.r);
+        let merged = true;
+        while (merged) {
+          merged = false;
+          for (let rr = 0; rr < 4 && !merged; rr++) {
+            for (let tt = 0; tt < RUNE.DEFS.length && !merged; tt++) {
+              if (PlayerState.combineRune(tt, rr)) merged = true;
+            }
+          }
+        }
+        PlayerState.save();
+      }
+
       /* 车轮战：敌人倒下立刻有人顶上来 */
       if (target.side === 'enemy' && !st.over && st.token === token) {
         await respawn(st, target);
@@ -848,6 +963,13 @@ const Battle = (function () {
   /* 按角色的技能等级生成三张技能卡
    *   我方：读 PlayerState 里买的等级（默认 0）
    *   敌方：按自身等级推算，Lv5 = 0 级，Lv90 以上 = 满级 6 */
+  /* 我方读 PlayerState 里装备的魔符；敌方不装备 */
+  function buildRuneFx(side, name) {
+    if (typeof RuneFx === 'undefined') return {};
+    if (side !== 'ally' || typeof PlayerState === 'undefined') return {};
+    return RuneFx.build(PlayerState.equippedOf(name));
+  }
+
   function buildSkillCards(elements, side, lv, name) {
     if (typeof skillsOfLevels !== 'function') return skillsOfElements(elements);
     if (side === 'ally' && typeof PlayerState !== 'undefined') {
@@ -891,6 +1013,8 @@ const Battle = (function () {
       atk: cs ? Math.round(cs.atk * starK) : tpl.atk,
       crit: tpl.crit == null ? 10 : tpl.crit,
       skills: buildSkillCards(elements, side, lv, tpl.name),
+      runeFx: buildRuneFx(side, tpl.name),
+      runeMute: false,
       statuses: [],
       alive: true,
     };

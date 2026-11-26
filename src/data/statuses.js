@@ -87,4 +87,8 @@ const STATUSES = {
     name: '封印', short: '封印', kind: 'debuff', color: '#b06bff',
     val: () => '无法使用任何主动技能',
   },
+  runeMute: {
+    name: '封符', short: '封符', kind: 'debuff', color: '#8fa0c8',
+    val: () => '魔符效果失效',
+  },
 };

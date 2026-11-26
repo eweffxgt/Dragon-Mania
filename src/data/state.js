@@ -23,7 +23,7 @@
  *      同时给 hydrate 的默认值，缺字段的老档才能平滑升级
  * ========================================================= */
 const PlayerState = (function () {
-  var SAVE_VERSION = 4;
+  var SAVE_VERSION = 5;
   var DEFAULT_GOLD = 1000000;    /* 初始金币 100 万（只对第一次玩的新档生效） */
   var DEFAULT_FRUIT = 100000;    /* 初始果实 10 万 */
   var DEFAULT_LEVEL = 10;        /* 所有角色初始等级 */
@@ -33,6 +33,8 @@ const PlayerState = (function () {
   var entries = {};              /* name -> { level, feed, stars, runes, skills } */
   var wallet = { gold: DEFAULT_GOLD, fruit: DEFAULT_FRUIT };
   var crystals = {};             /* 元素 id -> 水晶数量 */
+  var runes = [];                /* 魔符库存 [{t, r}] */
+  var equipped = {};             /* 角色名 -> [{t,r}|null, {t,r}|null] */
   var savedAt = 0;
 
   function clampLevel(v) {
@@ -145,6 +147,43 @@ const PlayerState = (function () {
     return out;
   }
 
+  /* ---------- 魔符 ---------- */
+  function runeList() { return runes; }
+
+  function addRune(t, r) {
+    var rec = { t: Math.max(0, Math.floor(t || 0)), r: Math.max(0, Math.min(4, Math.floor(r || 0))) };
+    runes.push(rec);
+    return rec;
+  }
+
+  function removeRune(rec) {
+    var i = runes.indexOf(rec);
+    if (i >= 0) runes.splice(i, 1);
+  }
+
+  /* 五个同种同级的合成一个高一级；返回合成后的 {t, r} 或 null */
+  function combineRune(t, r) {
+    var need = (typeof RUNE !== 'undefined') ? RUNE.COMBINE_NEED : 5;
+    if (r >= 4) return null;
+    var same = runes.filter(function (x) { return x.t === t && x.r === r; });
+    if (same.length < need) return null;
+    for (var i = 0; i < need; i++) removeRune(same[i]);
+    return addRune(t, r + 1);
+  }
+
+  function equippedOf(name) {
+    var e = equipped[name];
+    if (!e) { e = [null, null]; equipped[name] = e; }
+    return e;
+  }
+
+  function equipRune(name, slot, rec) {
+    var e = equippedOf(name);
+    var i = Math.floor(slot);
+    if (i < 0 || i > 1) return;
+    e[i] = rec || null;
+  }
+
   function levelOf(name, fallback) {
     var e = entries[name];
     return e ? e.level : clampLevel(fallback == null ? DEFAULT_LEVEL : fallback);
@@ -168,6 +207,14 @@ const PlayerState = (function () {
       ts: Date.now(),
       chars: chars,
       crystals: crystalMap(),
+      runes: runes.map(function (x) { return { t: x.t, r: x.r }; }),
+      equipped: (function () {
+        var out = {};
+        Object.keys(equipped).forEach(function (k) {
+          out[k] = equipped[k].map(function (x) { return x ? { t: x.t, r: x.r } : null; });
+        });
+        return out;
+      })(),
       wallet: { gold: wallet.gold, fruit: wallet.fruit }
     };
   }
@@ -206,8 +253,15 @@ const PlayerState = (function () {
       v = 4;
     }
 
+    if (v < 5) {
+      /* v4 -> v5：加魔符库存与装备位 */
+      if (!Array.isArray(data.runes)) data.runes = [];
+      if (!data.equipped || typeof data.equipped !== 'object') data.equipped = {};
+      v = 5;
+    }
+
     /* 留给下个版本：
-     * if (v < 5) { ...; v = 5; }
+     * if (v < 6) { ...; v = 6; }
      */
 
     data.v = v;
@@ -242,6 +296,26 @@ const PlayerState = (function () {
         changed = true;
       });
     }
+    if (Array.isArray(data.runes)) {
+      runes = data.runes
+        .filter(function (x) { return x && typeof x.t === 'number'; })
+        .map(function (x) {
+          return { t: Math.max(0, Math.floor(x.t)), r: Math.max(0, Math.min(4, Math.floor(x.r || 0))) };
+        });
+      changed = true;
+    }
+    if (data.equipped && typeof data.equipped === 'object') {
+      Object.keys(data.equipped).forEach(function (k) {
+        var arr = data.equipped[k];
+        if (!Array.isArray(arr)) return;
+        equipped[k] = [0, 1].map(function (i) {
+          var x = arr[i];
+          if (!x || typeof x.t !== 'number') return null;
+          return { t: Math.max(0, Math.floor(x.t)), r: Math.max(0, Math.min(4, Math.floor(x.r || 0))) };
+        });
+      });
+      changed = true;
+    }
     if (typeof data.ts === 'number') savedAt = data.ts;
     return changed;
   }
@@ -271,6 +345,8 @@ const PlayerState = (function () {
   function reset(keepWallet) {
     entries = {};
     crystals = {};
+    runes = [];
+    equipped = {};
     if (!keepWallet) {
       wallet.gold = DEFAULT_GOLD;
       wallet.fruit = DEFAULT_FRUIT;
@@ -282,6 +358,12 @@ const PlayerState = (function () {
     entry: entry,
     levelOf: levelOf,
     crystalOf: crystalOf,
+    runeList: runeList,
+    addRune: addRune,
+    removeRune: removeRune,
+    combineRune: combineRune,
+    equippedOf: equippedOf,
+    equipRune: equipRune,
     skillLevel: skillLevel,
     setSkillLevel: setSkillLevel,
     addCrystal: addCrystal,

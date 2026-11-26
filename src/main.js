@@ -254,6 +254,7 @@
 
   /* 彩蛋指令：
    *   00522 → 获得 1000 万金币（可重复）
+   *   00129 → 三个传奇·接纳 + 三个传奇·奇迹
    *   00110 → 重置存档
    * 其它输入不做任何事 */
   function submitEggCode() {
@@ -262,6 +263,24 @@
     if (code === '00522') {
       if (typeof PlayerState !== 'undefined') {
         PlayerState.wallet.gold += 10000000;
+        PlayerState.save();
+      }
+      closeResetConfirm();
+      showMenu();
+      return;
+    }
+    if (code === '00129') {
+      /* 三个传奇·接纳 + 三个传奇·奇迹 */
+      if (typeof PlayerState !== 'undefined' && typeof RUNE !== 'undefined') {
+        var accept = -1, miracle = -1;
+        RUNE.DEFS.forEach(function (d, i) {
+          if (d.id === 'accept') accept = i;
+          if (d.id === 'miracle') miracle = i;
+        });
+        for (var i = 0; i < 3; i++) {
+          if (accept >= 0) PlayerState.addRune(accept, 4);
+          if (miracle >= 0) PlayerState.addRune(miracle, 4);
+        }
         PlayerState.save();
       }
       closeResetConfirm();

@@ -31,7 +31,7 @@ const SKILL_DEFS = {
     desc: '先对主目标造成 100% 攻击伤害；其余敌人各受 85%，若主目标被击败，其余敌人再受一次 85%。',
     ops: [
       { op: 'damage', k: 0.85, to: 'otherEnemies' },
-      { op: 'onKill', ops: [{ op: 'damage', k: 0.85, to: 'otherEnemies' }] },
+      { op: 'onKill', ops: [{ op: 'damage', k: 0.85, to: 'snapshot' }] },
     ],
   },
 
@@ -75,7 +75,7 @@ const SKILL_DEFS = {
     ops: [
       { op: 'status', id: 'poison', k: 0.4, turns: 2, to: 'target' },
       { op: 'onKill', ifStatus: 'poison', ops: [
-        { op: 'status', id: 'poison', k: 0.4, turns: 2, to: 'otherEnemies' },
+        { op: 'status', id: 'poison', k: 0.4, turns: 2, to: 'snapshot' },
       ] },
     ],
   },

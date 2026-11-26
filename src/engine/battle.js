@@ -484,6 +484,11 @@ const Battle = (function () {
     const t = ctx.target;
     switch (to) {
       case 'otherEnemies': return aliveOf(st, foeSide).filter((c) => c !== t);
+      case 'snapshot': {
+        /* 只打「施放瞬间就在场」的那几个敌人：
+         * 车轮战补位会复用 uid，所以必须比对象本身，不能比 uid */
+        return (ctx.snapshotFoes || []).filter((c) => c && c.alive && st.byUid[c.uid] === c);
+      }
       case 'enemies': return aliveOf(st, foeSide);
       case 'allies': return aliveOf(st, actor.side);
       case 'otherAllies': return aliveOf(st, actor.side).filter((c) => c !== t);
@@ -653,12 +658,19 @@ const Battle = (function () {
       return;
     }
 
+    /* 施放瞬间的「其他敌人」快照：击杀连锁只打这批，不会波及车轮战补位上来的新敌人 */
+    const foeSideSnap = other(actor.side);
+    const snapshotFoes = aliveOf(st, foeSideSnap)
+      .filter((c) => c !== target)
+      .slice();
+
     const ctx = {
       skill,
       target,
       before: target.statuses.map((s) => s.id),
       hpBefore: target.hp,
       targetDied: false,
+      snapshotFoes: snapshotFoes,
     };
 
     /* ---- 第一步：对敌方先打一次 100% 攻击 ----

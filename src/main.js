@@ -429,6 +429,10 @@
     const seed = params.get('seed');
     if (seed) Battle.setSeed(seed);
 
+    /* HUD 控件（音效 / 离开战斗 / 快捷键）必须在任何入口都绑好，
+     * 之前只在 ?auto=1 分支里调用过 boot()，正常开局点重开没反应 */
+    boot();
+
     const screen = params.get('screen');
     if (screen === 'select') {
       Select.open();
@@ -459,7 +463,6 @@
     } else if (screen === 'manage') {
       Manage.open(Number(params.get('page')) || 0);
     } else if (params.get('auto') === '1') {
-      boot();
       startBattle();
     } else {
       showMenu();

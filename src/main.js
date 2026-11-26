@@ -94,7 +94,7 @@
     btnRestart.addEventListener('click', () => {
       Sfx.click();
       const d = el('leaveConfirm');
-      if (d) d.classList.remove('hidden');
+      if (d) { d.style.zIndex = '2000'; d.classList.remove('hidden'); }
     });
     const leaveYes = el('leaveYes');
     const leaveNo = el('leaveNo');
@@ -255,6 +255,7 @@
   function openResetConfirm() {
     const d = el('resetConfirm');
     const inp = el('eggInput');
+    if (d) d.style.zIndex = '2000';
     if (inp) inp.value = '';
     if (d) d.classList.remove('hidden');
     if (inp) setTimeout(() => inp.focus(), 30);

@@ -32,6 +32,7 @@ const PlayerState = (function () {
 
   var entries = {};              /* name -> { level, feed, stars, runes, skills } */
   var wallet = { gold: DEFAULT_GOLD, fruit: DEFAULT_FRUIT };
+  var dirty = false;             /* 本次会话是否已经改过/存过数据 */
   var crystals = {};             /* 元素 id -> 水晶数量 */
   var runes = [];                /* 魔符库存 [{id, t, r}] */
   var nextRuneId = 1;            /* 递增 id，装备时要按 id 扣库存 */
@@ -384,6 +385,7 @@ const PlayerState = (function () {
 
   function save() {
     if (typeof SaveStorage === 'undefined') return false;
+    dirty = true;                /* 改过数据后，本次会话不再接受远端覆盖 */
     savedAt = Date.now();
     return SaveStorage.write(snapshot());
   }
@@ -395,12 +397,18 @@ const PlayerState = (function () {
     if (local) hydrate(local);
 
     return SaveStorage.pull().then(function (remote) {
-      /* 小工具有数据、且本地没有时用它（首次换设备就是这条路径） */
-      if (remote && !local) {
-        hydrate(remote);
-        return true;
-      }
-      return false;
+      if (!remote) return false;
+
+      /* 闸门一：本次会话已经改过数据，说明内存比远端新，绝不能被覆盖 */
+      if (dirty) return false;
+
+      /* 闸门二：远端必须比本地更新才采用（ts 由 snapshot/save 维护） */
+      var remoteTs = Number(remote.ts) || 0;
+      if (savedAt && remoteTs <= savedAt) return false;
+      if (!remoteTs && local) return false;   /* 远端没时间戳且本地有档 → 保守起见不用 */
+
+      hydrate(remote);
+      return true;
     });
   }
 

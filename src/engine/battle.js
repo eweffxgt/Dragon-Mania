@@ -379,25 +379,25 @@ const Battle = (function () {
     }
 
     if (target.hp <= 0 && target.alive) {
-      /* 昭晦龙·阳形态被击败 → 变身阴形态，满血复活 */
-      if (target.form === 'yang' && target.yinBase) {
-        target.form = 'yin';
-        target.avatarUrl = 'assets/avatars/zhaohui_yin.png';
-        if (typeof UI.rebuildChar === 'function') UI.rebuildChar(target);
-        const yb = target.yinBase;
+      /* 昭晦龙·阳形态被击败 → 变身阴形态满血复活（与「重生」同一套写法） */
+      if (target.form === 'yang' && target.yinBase && !target.reborn) {
+        const yb = target.yinBase.yin || target.yinBase;
         const ycs = (typeof curveStats === 'function')
           ? curveStats(target.level, yb.hp100, yb.atk100) : null;
+        target.reborn = true;
+        target.form = 'yin';
+        target.avatarUrl = 'assets/avatars/zhaohui_yin.png';
         if (ycs) {
           target.maxHp = ycs.hp;
-          target.hp = ycs.hp;
           target.atk = ycs.atk;
-        } else {
-          target.hp = target.maxHp;
         }
+        target.hp = target.maxHp;
+        target.alive = true;
+        UI.rebuildChar && UI.rebuildChar(target);
         UI.refresh(st);
-        UI.floatText(target.uid, '阴形态', 'eff');
+        UI.floatText(target.uid, '阴形态', 'heal');
         UI.log('　' + nameHtml(target) + ' 化为【阴形态】！此后己方伤害全部按克制结算', 'log-status');
-        await sleep(600);
+        await sleep(360);
         checkEnd(st);
         return dmg;
       }

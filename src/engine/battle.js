@@ -382,6 +382,8 @@ const Battle = (function () {
       /* 昭晦龙·阳形态被击败 → 变身阴形态，满血复活 */
       if (target.form === 'yang' && target.yinBase) {
         target.form = 'yin';
+        target.avatarUrl = 'assets/avatars/zhaohui_yin.png';
+        if (typeof UI.rebuildChar === 'function') UI.rebuildChar(target);
         const yb = target.yinBase;
         const ycs = (typeof curveStats === 'function')
           ? curveStats(target.level, yb.hp100, yb.atk100) : null;
@@ -647,13 +649,6 @@ const Battle = (function () {
       return;
     }
 
-    /* 昭晦龙·阳形态：每次施放技能后，自身与友军回复 10% 生命上限 */
-    if (actor && actor.form === 'yang' && st.token === token && !st.over) {
-      const allies = st.chars.filter((c) => c.side === actor.side && c.alive);
-      for (let i = 0; i < allies.length; i++) {
-        await heal(st, allies[i], allies[i].maxHp * 0.1, '阳形态');
-      }
-    }
 
     /* ---- 击杀触发 ---- */
     if (op.op === 'onKill') {
@@ -729,6 +724,14 @@ const Battle = (function () {
     for (let i = 0; i < skill.ops.length; i++) {
       await runOp(st, actor, ctx, skill.ops[i]);
       if (st.over || st.token !== token) return;
+    }
+
+    /* 昭晦龙·阳形态：每次施放技能后，自身与全体友军回复 10% 生命上限 */
+    if (actor.form === 'yang' && !st.over && st.token === token) {
+      const mates = st.chars.filter((c) => c.side === actor.side && c.alive);
+      for (let i = 0; i < mates.length; i++) {
+        await heal(st, mates[i], mates[i].maxHp * 0.1, '阳形态');
+      }
     }
 
     await sleep(160);

@@ -726,11 +726,18 @@ const Battle = (function () {
       if (st.over || st.token !== token) return;
     }
 
-    /* 昭晦龙·阳形态：每次施放技能后，自身与全体友军回复 10% 生命上限 */
+    /* 昭晦龙·阳形态：每次施放技能后，自身与全体友军回复 10% 生命上限
+     * 用 try/catch 包住：这里出任何错都不能把整个回合循环打断 */
     if (actor.form === 'yang' && !st.over && st.token === token) {
-      const mates = st.chars.filter((c) => c.side === actor.side && c.alive);
-      for (let i = 0; i < mates.length; i++) {
-        await heal(st, mates[i], mates[i].maxHp * 0.1, '阳形态');
+      try {
+        const mates = st.chars.filter((c) => c.side === actor.side && c.alive);
+        for (let i = 0; i < mates.length; i++) {
+          const amt = Number(mates[i].maxHp) * 0.1;
+          if (!isFinite(amt) || amt <= 0) continue;
+          await heal(st, mates[i], amt, '阳形态');
+        }
+      } catch (err) {
+        if (window.console) console.warn('阳形态回血异常', err);
       }
     }
 
@@ -977,7 +984,14 @@ const Battle = (function () {
       }
       st.turnIndex = idx;
       st.activeUid = st.order[idx];
-      await takeTurn(st, st.byUid[st.activeUid]);
+      try {
+        await takeTurn(st, st.byUid[st.activeUid]);
+      } catch (err) {
+        /* 某一次行动内部报错时，记一笔并继续推进，避免整局卡死 */
+        if (window.console) console.error('行动异常', err);
+        UI.log('　[异常] 这次行动被跳过', 'log-status');
+        await sleep(300);
+      }
     }
 
     if (st.token !== token) return;

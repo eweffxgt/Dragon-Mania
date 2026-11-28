@@ -715,6 +715,19 @@ const Battle = (function () {
       }
       /* 辅助技能指向敌方：到此为止，没有任何附加效果 */
       if (skill.side === 'ally') {
+        /* 阳形态：辅助卡打敌人也要回血（这里原本直接 return，回血被跳过） */
+        if (actor.form === 'yang' && !st.over && st.token === token) {
+          try {
+            const mates = st.chars.filter((c) => c.side === actor.side && c.alive);
+            for (let i = 0; i < mates.length; i++) {
+              const amt = Number(mates[i].maxHp) * 0.1;
+              if (!isFinite(amt) || amt <= 0) continue;
+              await heal(st, mates[i], amt, '阳形态');
+            }
+          } catch (err) {
+            if (window.console) console.warn('阳形态回血异常', err);
+          }
+        }
         await sleep(160);
         return;
       }

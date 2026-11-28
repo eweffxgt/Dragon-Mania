@@ -393,7 +393,7 @@ const Battle = (function () {
         }
         target.hp = target.maxHp;
         target.alive = true;
-        UI.rebuildChar && UI.rebuildChar(target);
+        if (typeof UI.rebuildChar === 'function') UI.rebuildChar(st, target);   /* 参数是 (st, char) */
         UI.refresh(st);
         UI.floatText(target.uid, '阴形态', 'heal');
         UI.log('　' + nameHtml(target) + ' 化为【阴形态】！此后己方伤害全部按克制结算', 'log-status');

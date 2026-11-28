@@ -1049,12 +1049,12 @@ const Battle = (function () {
    *   等级 = min(100, 10 × ceil(N / 6))
    * 也就是前 6 个 10 级、7~12 个 20 级……到 100 级封顶。 */
   const WAVE_STEP = 6;          /* 每 6 个敌人涨一档 */
-  const WAVE_LEVEL = 5;         /* 每档 +5 级：5 / 10 / 15 … 100 封顶 */
+  const WAVE_LEVEL = 5;         /* 每档 +5 级：5 / 10 / 15 … 200 封顶 */
   const KILL_REWARD = 10000;    /* 每击杀一个敌人奖励的金币 */
 
   function enemyLevelOf(index) {
     var lv = WAVE_LEVEL * Math.ceil(index / WAVE_STEP);
-    return Math.min(100, Math.max(1, lv));
+    return Math.min(200, Math.max(1, lv));
   }
 
   function randomEnemyTpl(index) {

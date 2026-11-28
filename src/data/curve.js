@@ -14,7 +14,7 @@
 const CURVE = {
   k: 1.2,
   refLevel: 100,
-  maxLevel: 170
+  maxLevel: 200
 };
 
 function curveValue(v100, level) {

@@ -234,7 +234,9 @@ const Battle = (function () {
     dmg *= (1 + um.dealtPct / 100) * (1 + tm.takenPct / 100);
 
     /* 元素克制：技能元素 vs 目标主元素 → ×1.5 / ×1 / ×0.5 */
-    const mult = elementMatchup(element, target.element);
+    let mult = elementMatchup(element, target.element);
+    /* 昭晦龙·阴形态：己方所有伤害至少按克制算 */
+    if (user.form === 'yin' && mult < 1.5) mult = 1.5;
     dmg *= mult;
 
     /* 魔符：狂战 / 纯净 / 蛮勇 的直接伤害加成 */
@@ -377,6 +379,27 @@ const Battle = (function () {
     }
 
     if (target.hp <= 0 && target.alive) {
+      /* 昭晦龙·阳形态被击败 → 变身阴形态，满血复活 */
+      if (target.form === 'yang' && target.yinBase) {
+        target.form = 'yin';
+        const yb = target.yinBase;
+        const ycs = (typeof curveStats === 'function')
+          ? curveStats(target.level, yb.hp100, yb.atk100) : null;
+        if (ycs) {
+          target.maxHp = ycs.hp;
+          target.hp = ycs.hp;
+          target.atk = ycs.atk;
+        } else {
+          target.hp = target.maxHp;
+        }
+        UI.refresh(st);
+        UI.floatText(target.uid, '阴形态', 'eff');
+        UI.log('　' + nameHtml(target) + ' 化为【阴形态】！此后己方伤害全部按克制结算', 'log-status');
+        await sleep(600);
+        checkEnd(st);
+        return dmg;
+      }
+
       /* 魔符「重生」：阵亡时以 X% 生命复活一次 */
       if (typeof RuneFx !== 'undefined' && !target.reborn) {
         const rb = RuneFx.val(target, 'rebirth');
@@ -622,6 +645,14 @@ const Battle = (function () {
         UI.log('　' + op.failText, 'log-status');
       }
       return;
+    }
+
+    /* 昭晦龙·阳形态：每次施放技能后，自身与友军回复 10% 生命上限 */
+    if (actor && actor.form === 'yang' && st.token === token && !st.over) {
+      const allies = st.chars.filter((c) => c.side === actor.side && c.alive);
+      for (let i = 0; i < allies.length; i++) {
+        await heal(st, allies[i], allies[i].maxHp * 0.1, '阳形态');
+      }
     }
 
     /* ---- 击杀触发 ---- */
@@ -1007,7 +1038,11 @@ const Battle = (function () {
     const lv = (side === 'ally' && typeof PlayerState !== 'undefined')
       ? PlayerState.entry(tpl.name, tpl.level).level
       : (tpl.level || 1);
-    const base = (typeof CHAR_BASE !== 'undefined') ? CHAR_BASE[tpl.name] : null;
+    let base = (typeof CHAR_BASE !== 'undefined') ? CHAR_BASE[tpl.name] : null;
+    /* 昭晦龙：默认阳形态，变身后走阴形态数值 */
+    const isZhaohui = (tpl.name === '昭晦龙');
+    const form = (side === 'ally' && isZhaohui) ? 'yang' : '';
+    if (form === 'yin' && base && base.yin) base = base.yin;
     const cs = (typeof curveStats === 'function')
       ? curveStats(lv, base && base.hp100, base && base.atk100)
       : null;
@@ -1039,6 +1074,8 @@ const Battle = (function () {
       skills: buildSkillCards(elements, side, lv, tpl.name),
       runeFx: runeFxTmp,
       runeMute: false,
+      form: form,                  /* 昭晦龙：yang / yin */
+      yinBase: (isZhaohui && base) ? base : null,
       statuses: [],
       alive: true,
     };
@@ -1058,7 +1095,9 @@ const Battle = (function () {
   }
 
   function randomEnemyTpl(index) {
-    var dex = (typeof GUIDE_DEX !== 'undefined' && GUIDE_DEX.length) ? GUIDE_DEX : null;
+    var dex = (typeof GUIDE_DEX !== 'undefined' && GUIDE_DEX.length)
+      ? GUIDE_DEX.filter(function (d) { return !d.locked; })   /* 彩蛋角色不进敌方池 */
+      : null;
     if (!dex) return null;
     var pick = dex[Math.floor(rnd() * dex.length) % dex.length];
     return {

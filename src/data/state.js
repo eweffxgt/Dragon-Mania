@@ -23,7 +23,7 @@
  *      同时给 hydrate 的默认值，缺字段的老档才能平滑升级
  * ========================================================= */
 const PlayerState = (function () {
-  var SAVE_VERSION = 6;
+  var SAVE_VERSION = 7;
   var DEFAULT_GOLD = 1000000;    /* 初始金币 100 万（只对第一次玩的新档生效） */
   var DEFAULT_FRUIT = 100000;    /* 初始果实 10 万 */
   var DEFAULT_LEVEL = 10;        /* 所有角色初始等级 */
@@ -32,6 +32,7 @@ const PlayerState = (function () {
 
   var entries = {};              /* name -> { level, feed, stars, runes, skills } */
   var wallet = { gold: DEFAULT_GOLD, fruit: DEFAULT_FRUIT };
+  var flags = {};                /* 彩蛋解锁等开关 */
   var dirty = false;             /* 本次会话是否已经改过/存过数据 */
   var crystals = {};             /* 元素 id -> 水晶数量 */
   var runes = [];                /* 魔符库存 [{id, t, r}] */
@@ -106,6 +107,14 @@ const PlayerState = (function () {
   }
 
   /* ---------- 水晶（升星材料，按元素分） ---------- */
+  /* ---------- 解锁标记（彩蛋角色等） ---------- */
+  function isUnlocked(key) { return !!flags[key]; }
+  function setUnlocked(key, on) {
+    if (!key) return false;
+    flags[key] = !!on;
+    return flags[key];
+  }
+
   /* ---------- 技能等级（element -> 0..6） ---------- */
   function skillLevel(name, element) {
     var e = name ? entries[name] : null;
@@ -235,6 +244,7 @@ const PlayerState = (function () {
       ts: Date.now(),
       chars: chars,
       crystals: crystalMap(),
+      flags: Object.assign({}, flags),
       runes: runes.map(function (x) { return { id: x.id, t: x.t, r: x.r }; }),
       nextRuneId: nextRuneId,
       equipped: (function () {
@@ -282,6 +292,10 @@ const PlayerState = (function () {
       v = 4;
     }
 
+    if (v < 7) {
+      if (!data.flags || typeof data.flags !== 'object') data.flags = {};
+      v = 7;
+    }
     if (v < 5) {
       /* v4 -> v5：加魔符库存与装备位 */
       if (!Array.isArray(data.runes)) data.runes = [];
@@ -360,6 +374,10 @@ const PlayerState = (function () {
       runes.forEach(function (x) { if (x.id >= nextRuneId) nextRuneId = x.id + 1; });
       changed = true;
     }
+    if (data.flags && typeof data.flags === 'object') {
+      Object.keys(data.flags).forEach(function (k) { if (data.flags[k]) flags[k] = true; });
+      changed = true;
+    }
     if (typeof data.nextRuneId === 'number' && data.nextRuneId > nextRuneId) {
       nextRuneId = Math.floor(data.nextRuneId);
     }
@@ -417,6 +435,7 @@ const PlayerState = (function () {
     crystals = {};
     runes = [];
     equipped = {};
+    flags = {};
     nextRuneId = 1;
     if (!keepWallet) {
       wallet.gold = DEFAULT_GOLD;
@@ -432,6 +451,8 @@ const PlayerState = (function () {
     runeList: runeList,
     addRune: addRune,
     runeById: runeById,
+    isUnlocked: isUnlocked,
+    setUnlocked: setUnlocked,
     removeRune: removeRune,
     combineRune: combineRune,
     equippedOf: equippedOf,

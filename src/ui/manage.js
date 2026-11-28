@@ -37,7 +37,7 @@ const Manage = (function () {
   }
 
   function pageCount() {
-    return Math.max(1, Math.ceil(GUIDE_DEX.length / PER_PAGE));
+    return Math.max(1, Math.ceil(GUIDE_LIST().length / PER_PAGE));
   }
 
   function render() {
@@ -48,7 +48,8 @@ const Manage = (function () {
     var html = '';
 
     for (var i = 0; i < PER_PAGE; i++) {
-      var d = GUIDE_DEX[start + i];
+      var list = GUIDE_LIST();
+    var d = list[start + i];
       var wx = WIN_X[i];
 
       /* 全身图 */
@@ -89,7 +90,7 @@ const Manage = (function () {
         var b = e.currentTarget;
         if (b.disabled) return;
         var idx = page * PER_PAGE + Number(b.getAttribute('data-idx'));
-        var ch = GUIDE_DEX[idx];
+        var ch = GUIDE_LIST()[idx];
         if (!ch) return;
         if (typeof Sfx !== 'undefined' && Sfx.click) Sfx.click();
         if (onOpen) onOpen(b.getAttribute('data-act'), b.textContent, ch);

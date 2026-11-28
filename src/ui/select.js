@@ -25,7 +25,7 @@ const Select = (function () {
   function el(id) { return document.getElementById(id); }
 
   function owned() {
-    return (typeof GUIDE_DEX !== 'undefined') ? GUIDE_DEX : [];
+    return (typeof GUIDE_LIST === 'function') ? GUIDE_LIST() : (typeof GUIDE_DEX !== 'undefined' ? GUIDE_DEX : []);
   }
 
   function render() {

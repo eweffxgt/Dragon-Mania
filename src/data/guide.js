@@ -9,6 +9,19 @@
  * ========================================================= */
 const GUIDE_PER_PAGE = 16;
 
+/* 可见角色列表：未解锁的彩蛋角色被过滤，解锁后排到第一位 */
+function GUIDE_LIST() {
+  var unlocked = (typeof PlayerState !== 'undefined' && PlayerState.isUnlocked)
+    ? PlayerState.isUnlocked('zhaohui') : false;
+  var list = GUIDE_DEX.filter(function (d) { return !d.locked || unlocked; });
+  if (unlocked) {
+    var first = list.filter(function (d) { return d.locked; });
+    var rest = list.filter(function (d) { return !d.locked; });
+    list = first.concat(rest);
+  }
+  return list;
+}
+
 const GUIDE_DEX = [
   { name: '奥亚龙',       elements: ['ancient', 'holy', 'fire'],       avatar: 'assets/avatars/aoya.png',            full: 'assets/full/aoya.png',            level: 10 },
   { name: '巴哈吉尔龙',   elements: ['ancient', 'holy', 'water'],      avatar: 'assets/avatars/bahajier.png',        full: 'assets/full/bahajier.png',        level: 10 },
@@ -33,7 +46,12 @@ const GUIDE_DEX = [
   { name: '乌姆布拉龙',   elements: ['overlord', 'fire', 'electric'],  avatar: 'assets/avatars/wumubula.png',        full: 'assets/full/wumubula.png',        level: 10 },
   { name: '伊奥斯加龙',   elements: ['ancient', 'fire', 'grass'],      avatar: 'assets/avatars/yiao.png',            full: 'assets/full/yiao.png',            level: 10 },
   { name: '伊克斯龙',     elements: ['ancient', 'electric', 'fire'],   avatar: 'assets/avatars/yikesi.png',          full: 'assets/full/yikesi.png',          level: 10 },
-  { name: '佐尔托龙',     elements: ['ancient', 'holy', 'electric'],   avatar: 'assets/avatars/zuoerto.png',         full: 'assets/full/zuoerto.png',         level: 10 },
+  { name: '佐尔托龙',     elements: ['ancient', 'holy', 'electric'],   avatar: 'assets/avatars/zuoerto.png',         full: 'assets/full/zuoerto.png',         level: 10 },,
+  /* 彩蛋角色：未解锁时不出现在任何界面，也不进敌方池 */
+  { name: '昭晦龙', elements: ['ancient', 'holy', 'overlord'],
+    avatar: 'assets/avatars/zhaohui_yang.png', full: 'assets/full/zhaohui_yang.png',
+    avatarYin: 'assets/avatars/zhaohui_yin.png', fullYin: 'assets/full/zhaohui_yin.png',
+    level: 10, locked: 'zhaohui' }
 ];
 
 const GUIDE_BLANK_AVATAR = 'assets/avatars/blank.png';

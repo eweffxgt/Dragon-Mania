@@ -300,6 +300,14 @@
       if (typeof RuneUp !== 'undefined') RuneUp.render();
       return;
     }
+    if (code === '01000') {
+      if (typeof PlayerState !== 'undefined') {
+        PlayerState.setUnlocked('zhaohui', true);
+        PlayerState.save();
+      }
+      eggResult('昭晦龙 已加入图鉴');
+      return;
+    }
     if (code === '00110') {
       closeResetConfirm();
       if (typeof PlayerState !== 'undefined') {

@@ -21,7 +21,7 @@ const Guide = (function () {
   }
 
   function pageCount() {
-    return Math.max(1, Math.ceil(GUIDE_DEX.length / GUIDE_PER_PAGE));
+    return Math.max(1, Math.ceil(GUIDE_LIST().length / GUIDE_PER_PAGE));
   }
 
   function slotPos(i) {
@@ -53,7 +53,8 @@ const Guide = (function () {
     var html = '';
 
     for (var i = 0; i < GUIDE_PER_PAGE; i++) {
-      var d = GUIDE_DEX[start + i];
+      var list = GUIDE_LIST();
+    var d = list[start + i];
       var p = slotPos(i);
 
       /* 窗口：头像 + 底部名字条（和战斗界面同一套样式） */

@@ -115,6 +115,10 @@
     }
 
     document.addEventListener('keydown', (e) => {
+      /* 焦点在输入框里时，不让 1/2/3 的快捷键抢走按键（彩蛋码要能输入数字） */
+      const tgt = e.target;
+      if (tgt && (tgt.tagName === 'INPUT' || tgt.tagName === 'TEXTAREA' || tgt.isContentEditable)) return;
+
       if (e.key === 'Escape') {
         Battle.cancelCard();
         return;
